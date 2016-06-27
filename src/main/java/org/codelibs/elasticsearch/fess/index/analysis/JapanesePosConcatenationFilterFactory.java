@@ -16,6 +16,8 @@
 
 package org.codelibs.elasticsearch.fess.index.analysis;
 
+import java.lang.reflect.Constructor;
+
 import org.apache.lucene.analysis.TokenStream;
 import org.codelibs.elasticsearch.fess.analysis.EmptyTokenizer;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
@@ -28,8 +30,6 @@ import org.elasticsearch.index.Index;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.settings.IndexSettingsService;
-
-import java.lang.reflect.Constructor;
 
 public class JapanesePosConcatenationFilterFactory extends AbstractTokenFilterFactory {
 

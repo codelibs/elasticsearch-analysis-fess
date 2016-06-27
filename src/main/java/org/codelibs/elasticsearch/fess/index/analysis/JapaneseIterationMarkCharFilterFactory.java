@@ -19,7 +19,6 @@ package org.codelibs.elasticsearch.fess.index.analysis;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
 
-import org.codelibs.elasticsearch.fess.analysis.EmptyCharFilter;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.inject.Inject;
@@ -63,6 +62,6 @@ public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFa
         if (charFilterFactory != null) {
             return charFilterFactory.create(reader);
         }
-        return new EmptyCharFilter(reader);
+        return reader;
     }
 }

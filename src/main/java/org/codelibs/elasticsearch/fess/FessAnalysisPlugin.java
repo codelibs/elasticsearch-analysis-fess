@@ -47,20 +47,16 @@ public class FessAnalysisPlugin extends Plugin {
     }
 
     public void onModule(AnalysisModule module) {
-        module.addCharFilter("japanese_neologd_iteration_mark", JapaneseIterationMarkCharFilterFactory.class);
+        module.addCharFilter("fess_japanese_iteration_mark", JapaneseIterationMarkCharFilterFactory.class);
         //        module.addAnalyzer("kuromoji_neologd", KuromojiAnalyzerProvider.class);
         module.addTokenizer("fess_japanese_tokenizer", JapaneseTokenizerFactory.class);
-        module.addTokenFilter("japanese_neologd_baseform", JapaneseBaseFormFilterFactory.class);
-        module.addTokenFilter("japanese_neologd_part_of_speech", JapanesePartOfSpeechFilterFactory.class);
-        module.addTokenFilter("japanese_neologd_readingform", JapaneseReadingFormFilterFactory.class);
+        module.addTokenFilter("fess_japanese_baseform", JapaneseBaseFormFilterFactory.class);
+        module.addTokenFilter("fess_japanese_part_of_speech", JapanesePartOfSpeechFilterFactory.class);
+        module.addTokenFilter("fess_japanese_readingform", JapaneseReadingFormFilterFactory.class);
         module.addTokenFilter("fess_japanese_stemmer", JapaneseKatakanaStemmerFactory.class);
+        module.addTokenizer("fess_japanese_reloadable_tokenizer", ReloadableJapaneseTokenizerFactory.class);
+        module.addTokenFilter("fess_japanese_pos_concat", JapanesePosConcatenationFilterFactory.class);
 
-        module.addTokenizer("reloadable_japanese_neologd_tokenizer", ReloadableJapaneseTokenizerFactory.class);
-        module.addTokenizer("reloadable_japanese_neologd", ReloadableJapaneseTokenizerFactory.class);
-
-        module.addTokenFilter("japanese_neologd_pos_concat", JapanesePosConcatenationFilterFactory.class);
-
-
-        module.addTokenizer("seunjeon_tokenizer", KoreanTokenizerFactory.class);
+        module.addTokenizer("fess_korean_tokenizer", KoreanTokenizerFactory.class);
     }
 }

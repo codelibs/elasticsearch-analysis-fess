@@ -16,8 +16,9 @@
 
 package org.codelibs.elasticsearch.fess.index.analysis;
 
+import java.lang.reflect.Constructor;
+
 import org.apache.lucene.analysis.TokenStream;
-import org.codelibs.elasticsearch.fess.analysis.EmptyTokenFilter;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.inject.Inject;
@@ -28,8 +29,6 @@ import org.elasticsearch.index.Index;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.settings.IndexSettingsService;
-
-import java.lang.reflect.Constructor;
 
 public class JapaneseBaseFormFilterFactory extends AbstractTokenFilterFactory {
 
@@ -63,6 +62,6 @@ public class JapaneseBaseFormFilterFactory extends AbstractTokenFilterFactory {
         if (tokenFilterFactory != null) {
             return tokenFilterFactory.create(tokenStream);
         }
-        return new EmptyTokenFilter(tokenStream);
+        return tokenStream;
     }
 }
