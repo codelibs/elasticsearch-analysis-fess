@@ -16,9 +16,8 @@
 
 package org.codelibs.elasticsearch.fess.index.analysis;
 
-import java.lang.reflect.Constructor;
-
 import org.apache.lucene.analysis.TokenStream;
+import org.codelibs.elasticsearch.fess.analysis.EmptyTokenFilter;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.inject.Inject;
@@ -29,29 +28,30 @@ import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.settings.IndexSettingsService;
 
-public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
+import java.lang.reflect.Constructor;
 
-    private static final String KUROMOJI_KATAKANA_STEMMER_FACTORY =
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiKatakanaStemmerFactory";
+public class JapaneseReadingFormFilterFactory extends AbstractTokenFilterFactory {
 
-    private TokenFilterFactory tokenFilterFactory;
+    private static final String KUROMOJI_READING_FORM_FILTER_FACTORY =
+            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiReadingFormFilterFactory";
+
+    private TokenFilterFactory tokenFilterFactory = null;
 
     @Inject
-    public JapaneseKatakanaStemmerFactory(Index index, IndexSettingsService indexSettingsService, @Assisted String name,
-            @Assisted Settings settings, final FessAnalysisService fessAnalysisService) {
+    public JapaneseReadingFormFilterFactory(Index index, IndexSettingsService indexSettingsService, @Assisted String name, @Assisted Settings settings, FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(KUROMOJI_KATAKANA_STEMMER_FACTORY);
+        Class<?> tokenFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_READING_FORM_FILTER_FACTORY);
         if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_KATAKANA_STEMMER_FACTORY);
+            logger.info("{} is not found.", KUROMOJI_READING_FORM_FILTER_FACTORY);
         }
-        if (tokenizerFactoryClass != null) {
+        if (tokenFilterFactoryClass != null) {
             try {
-                final Constructor<?> constructor =
-                        tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class, String.class, Settings.class);
+                final Constructor<?> constructor = tokenFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
+                        String.class, Settings.class);
                 tokenFilterFactory = (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
             } catch (final Exception e) {
-                throw new ElasticsearchException("Failed to load " + KUROMOJI_KATAKANA_STEMMER_FACTORY, e);
+                throw new ElasticsearchException("Failed to load " + KUROMOJI_READING_FORM_FILTER_FACTORY, e);
             }
         }
     }
@@ -61,7 +61,7 @@ public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
         if (tokenFilterFactory != null) {
             return tokenFilterFactory.create(tokenStream);
         }
-        return tokenStream;
+        return new EmptyTokenFilter(tokenStream);
     }
 
 }

@@ -16,42 +16,44 @@
 
 package org.codelibs.elasticsearch.fess.index.analysis;
 
-import java.lang.reflect.Constructor;
-
 import org.apache.lucene.analysis.TokenStream;
+import org.codelibs.elasticsearch.fess.analysis.EmptyTokenFilter;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.inject.assistedinject.Assisted;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.Index;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.settings.IndexSettingsService;
 
-public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
+import java.lang.reflect.Constructor;
 
-    private static final String KUROMOJI_KATAKANA_STEMMER_FACTORY =
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiKatakanaStemmerFactory";
+public class JapanesePartOfSpeechFilterFactory extends AbstractTokenFilterFactory {
 
-    private TokenFilterFactory tokenFilterFactory;
+    private static final String KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY =
+            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiPartOfSpeechFilterFactory";
+
+    private TokenFilterFactory tokenFilterFactory = null;
 
     @Inject
-    public JapaneseKatakanaStemmerFactory(Index index, IndexSettingsService indexSettingsService, @Assisted String name,
-            @Assisted Settings settings, final FessAnalysisService fessAnalysisService) {
+    public JapanesePartOfSpeechFilterFactory(Index index, IndexSettingsService indexSettingsService, Environment env,
+            @Assisted String name, @Assisted Settings settings, FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(KUROMOJI_KATAKANA_STEMMER_FACTORY);
+        Class<?> TokenFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
         if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_KATAKANA_STEMMER_FACTORY);
+            logger.info("{} is not found.", KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
         }
-        if (tokenizerFactoryClass != null) {
+        if (TokenFilterFactoryClass != null) {
             try {
-                final Constructor<?> constructor =
-                        tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class, String.class, Settings.class);
-                tokenFilterFactory = (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
+                final Constructor<?> constructor = TokenFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
+                        Environment.class, String.class, Settings.class);
+                tokenFilterFactory = (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
             } catch (final Exception e) {
-                throw new ElasticsearchException("Failed to load " + KUROMOJI_KATAKANA_STEMMER_FACTORY, e);
+                throw new ElasticsearchException("Failed to load " + KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY, e);
             }
         }
     }
@@ -61,7 +63,6 @@ public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
         if (tokenFilterFactory != null) {
             return tokenFilterFactory.create(tokenStream);
         }
-        return tokenStream;
+        return new EmptyTokenFilter(tokenStream);
     }
-
 }

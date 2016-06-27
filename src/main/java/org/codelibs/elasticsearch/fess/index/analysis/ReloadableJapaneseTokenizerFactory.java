@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-201 the CodeLibs Project and the Others.
+ * Copyright 2009-2016 the CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,21 +31,22 @@ import org.elasticsearch.index.analysis.AbstractTokenizerFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
 import org.elasticsearch.index.settings.IndexSettingsService;
 
-public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
+public class ReloadableJapaneseTokenizerFactory extends AbstractTokenizerFactory {
 
-    private static final String KUROMOJI_TOKENIZER_FACTORY =
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiTokenizerFactory";
+    private static final String RELOADABLE_KUROMOJI_TOKENIZER_FACTORY =
+            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.ReloadableKuromojiTokenizerFactory";
 
     private TokenizerFactory tokenizerFactory = null;
 
     @Inject
-    public JapaneseTokenizerFactory(Index index, IndexSettingsService indexSettingsService, Environment env, @Assisted String name,
-            @Assisted Settings settings, FessAnalysisService fessAnalysisService) {
+    public ReloadableJapaneseTokenizerFactory(final Index index,
+            final IndexSettingsService indexSettingsService, final Environment env,
+            @Assisted final String name, @Assisted final Settings settings, FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(KUROMOJI_TOKENIZER_FACTORY);
+        Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(RELOADABLE_KUROMOJI_TOKENIZER_FACTORY);
         if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_TOKENIZER_FACTORY);
+            logger.info("{} is not found.", RELOADABLE_KUROMOJI_TOKENIZER_FACTORY);
         }
         if (tokenizerFactoryClass != null) {
             try {
@@ -53,7 +54,7 @@ public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
                         Environment.class, String.class, Settings.class);
                 tokenizerFactory = (TokenizerFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
             } catch (final Exception e) {
-                throw new ElasticsearchException("Failed to load " + KUROMOJI_TOKENIZER_FACTORY, e);
+                throw new ElasticsearchException("Failed to load " + RELOADABLE_KUROMOJI_TOKENIZER_FACTORY, e);
             }
         }
     }
@@ -67,3 +68,4 @@ public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
     }
 
 }
+
