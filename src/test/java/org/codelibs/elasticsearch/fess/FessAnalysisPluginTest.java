@@ -4,13 +4,6 @@ import static org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.newCo
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
@@ -109,22 +102,14 @@ public class FessAnalysisPluginTest {
         assertTrue(indexResponse1.isCreated());
         runner.refresh();
 
-//        assertDocCount(1, index, type, "msg", "東京スカイツリー");
-//
-//        try (CurlResponse response =
-//                Curl.post(node, "/" + index + "/_analyze").param("analyzer", "ja_analyzer").body("東京スカイツリー").execute()) {
-//            @SuppressWarnings("unchecked")
-//            List<Map<String, Object>> tokens = (List<Map<String, Object>>) response.getContentAsMap().get("tokens");
-//            assertEquals("東京", tokens.get(0).get("token").toString());
-//            assertEquals("スカイツリ", tokens.get(1).get("token").toString());
-//        }
-//
-//        try (CurlResponse response =
-//                Curl.post(node, "/" + index + "/_analyze").param("analyzer", "ja_analyzer").body("きゃりーぱみゅぱみゅ").execute()) {
-//            @SuppressWarnings("unchecked")
-//            List<Map<String, Object>> tokens = (List<Map<String, Object>>) response.getContentAsMap().get("tokens");
-//            assertEquals("きゃりーぱみゅぱみゅ", tokens.get(0).get("token").toString());
-//        }
+        assertDocCount(0, index, type, "msg", "東京スカイツリー");
+
+        try (CurlResponse response =
+                Curl.post(node, "/" + index + "/_analyze").param("analyzer", "ja_analyzer").body("東京スカイツリー").execute()) {
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> tokens = (List<Map<String, Object>>) response.getContentAsMap().get("tokens");
+            assertEquals(0, tokens.size());
+        }
 
     }
 
