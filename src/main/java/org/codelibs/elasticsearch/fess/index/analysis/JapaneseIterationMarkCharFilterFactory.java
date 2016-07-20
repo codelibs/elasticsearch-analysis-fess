@@ -18,6 +18,8 @@ package org.codelibs.elasticsearch.fess.index.analysis;
 
 import java.io.Reader;
 import java.lang.reflect.Constructor;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.ElasticsearchException;
@@ -38,27 +40,32 @@ public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFa
     private CharFilterFactory charFilterFactory = null;
 
     @Inject
-    public JapaneseIterationMarkCharFilterFactory(Index index, IndexSettingsService indexSettingsService,
-            @Assisted String name, @Assisted Settings settings, FessAnalysisService fessAnalysisService) {
+    public JapaneseIterationMarkCharFilterFactory(final Index index, final IndexSettingsService indexSettingsService,
+            @Assisted final String name, @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name);
 
-        Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY);
+        final Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY);
         if (logger.isInfoEnabled()) {
             logger.info("{} is not found.", KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY);
         }
         if (charFilterFactoryClass != null) {
-            try {
-                final Constructor<?> constructor = charFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
-                        Environment.class, String.class, Settings.class);
-                charFilterFactory = (CharFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
-            } catch (final Exception e) {
-                throw new ElasticsearchException("Failed to load " + KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY, e);
-            }
+            charFilterFactory = AccessController.doPrivileged(new PrivilegedAction<CharFilterFactory>() {
+                @Override
+                public CharFilterFactory run() {
+                    try {
+                        final Constructor<?> constructor = charFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
+                                Environment.class, String.class, Settings.class);
+                        return (CharFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
+                    } catch (final Exception e) {
+                        throw new ElasticsearchException("Failed to load " + KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY, e);
+                    }
+                }
+            });
         }
     }
 
     @Override
-    public Reader create(Reader reader) {
+    public Reader create(final Reader reader) {
         if (charFilterFactory != null) {
             return charFilterFactory.create(reader);
         }

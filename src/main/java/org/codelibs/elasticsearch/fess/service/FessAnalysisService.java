@@ -1,6 +1,8 @@
 package org.codelibs.elasticsearch.fess.service;
 
 import java.lang.reflect.Field;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.List;
 
 import org.elasticsearch.ElasticsearchException;
@@ -14,7 +16,7 @@ import org.elasticsearch.plugins.PluginsService;
 
 public class FessAnalysisService extends AbstractLifecycleComponent<FessAnalysisService> {
 
-    private PluginsService pluginsService;
+    private final PluginsService pluginsService;
 
     private List<Tuple<PluginInfo, Plugin>> plugins;
 
@@ -33,13 +35,18 @@ public class FessAnalysisService extends AbstractLifecycleComponent<FessAnalysis
 
     @SuppressWarnings("unchecked")
     private List<Tuple<PluginInfo, Plugin>> loadPlugins() {
-        try {
-            final Field pluginsField = pluginsService.getClass().getDeclaredField("plugins");
-            pluginsField.setAccessible(true);
-            return (List<Tuple<PluginInfo, Plugin>>) pluginsField.get(pluginsService);
-        } catch (Exception e) {
-            throw new ElasticsearchException("Failed to access plugins in PluginsService.", e);
-        }
+        return AccessController.doPrivileged(new PrivilegedAction<List<Tuple<PluginInfo, Plugin>>>() {
+            @Override
+            public List<Tuple<PluginInfo, Plugin>> run() {
+                try {
+                    final Field pluginsField = pluginsService.getClass().getDeclaredField("plugins");
+                    pluginsField.setAccessible(true);
+                    return (List<Tuple<PluginInfo, Plugin>>) pluginsField.get(pluginsService);
+                } catch (final Exception e) {
+                    throw new ElasticsearchException("Failed to access plugins in PluginsService.", e);
+                }
+            }
+        });
     }
 
     @Override
@@ -52,16 +59,21 @@ public class FessAnalysisService extends AbstractLifecycleComponent<FessAnalysis
         logger.info("Closing FessAnalysisService");
     }
 
-    public Class<?> loadClass(String className) {
-        for (Tuple<PluginInfo, Plugin> p : plugins) {
-            final Plugin plugin = p.v2();
-            try {
-                return plugin.getClass().getClassLoader().loadClass(className);
-            } catch (ClassNotFoundException e) {
-                // ignore
+    public Class<?> loadClass(final String className) {
+        return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
+            @Override
+            public Class<?> run() {
+                for (final Tuple<PluginInfo, Plugin> p : plugins) {
+                    final Plugin plugin = p.v2();
+                    try {
+                        return plugin.getClass().getClassLoader().loadClass(className);
+                    } catch (final ClassNotFoundException e) {
+                        // ignore
+                    }
+                }
+                return null;
             }
-        }
-        return null;
+        });
     }
 
 }

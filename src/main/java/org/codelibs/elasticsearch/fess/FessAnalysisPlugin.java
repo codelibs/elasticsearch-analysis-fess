@@ -46,7 +46,7 @@ public class FessAnalysisPlugin extends Plugin {
         return services;
     }
 
-    public void onModule(AnalysisModule module) {
+    public void onModule(final AnalysisModule module) {
         module.addCharFilter("fess_japanese_iteration_mark", JapaneseIterationMarkCharFilterFactory.class);
         //        module.addAnalyzer("kuromoji_neologd", KuromojiAnalyzerProvider.class);
         module.addTokenizer("fess_japanese_tokenizer", JapaneseTokenizerFactory.class);

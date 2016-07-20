@@ -17,6 +17,8 @@
 package org.codelibs.elasticsearch.fess.index.analysis;
 
 import java.lang.reflect.Constructor;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.apache.lucene.analysis.Tokenizer;
 import org.codelibs.elasticsearch.fess.analysis.EmptyTokenizer;
@@ -39,22 +41,27 @@ public class KoreanTokenizerFactory extends AbstractTokenizerFactory {
     private TokenizerFactory tokenizerFactory = null;
 
     @Inject
-    public KoreanTokenizerFactory(Index index, IndexSettingsService indexSettingsService, Environment env, @Assisted String name,
-                                    @Assisted Settings settings, FessAnalysisService fessAnalysisService) {
+    public KoreanTokenizerFactory(final Index index, final IndexSettingsService indexSettingsService, final Environment env,
+            @Assisted final String name, @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(SEUNJEON_TOKENIZER_FACTORY);
+        final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(SEUNJEON_TOKENIZER_FACTORY);
         if (logger.isInfoEnabled()) {
             logger.info("{} is not found.", SEUNJEON_TOKENIZER_FACTORY);
         }
         if (tokenizerFactoryClass != null) {
-            try {
-                final Constructor<?> constructor = tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
-                        Environment.class, String.class, Settings.class);
-                tokenizerFactory = (TokenizerFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
-            } catch (final Exception e) {
-                throw new ElasticsearchException("Failed to load " + SEUNJEON_TOKENIZER_FACTORY, e);
-            }
+            tokenizerFactory = AccessController.doPrivileged(new PrivilegedAction<TokenizerFactory>() {
+                @Override
+                public TokenizerFactory run() {
+                    try {
+                        final Constructor<?> constructor = tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
+                                Environment.class, String.class, Settings.class);
+                        return (TokenizerFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
+                    } catch (final Exception e) {
+                        throw new ElasticsearchException("Failed to load " + SEUNJEON_TOKENIZER_FACTORY, e);
+                    }
+                }
+            });
         }
     }
 

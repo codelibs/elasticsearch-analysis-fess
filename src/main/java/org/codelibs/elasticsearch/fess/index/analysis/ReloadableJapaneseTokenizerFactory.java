@@ -17,6 +17,8 @@
 package org.codelibs.elasticsearch.fess.index.analysis;
 
 import java.lang.reflect.Constructor;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.apache.lucene.analysis.Tokenizer;
 import org.codelibs.elasticsearch.fess.analysis.EmptyTokenizer;
@@ -39,23 +41,28 @@ public class ReloadableJapaneseTokenizerFactory extends AbstractTokenizerFactory
     private TokenizerFactory tokenizerFactory = null;
 
     @Inject
-    public ReloadableJapaneseTokenizerFactory(final Index index,
-            final IndexSettingsService indexSettingsService, final Environment env,
-            @Assisted final String name, @Assisted final Settings settings, FessAnalysisService fessAnalysisService) {
+    public ReloadableJapaneseTokenizerFactory(final Index index, final IndexSettingsService indexSettingsService, final Environment env,
+            @Assisted final String name, @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(RELOADABLE_KUROMOJI_TOKENIZER_FACTORY);
+        final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(RELOADABLE_KUROMOJI_TOKENIZER_FACTORY);
         if (logger.isInfoEnabled()) {
             logger.info("{} is not found.", RELOADABLE_KUROMOJI_TOKENIZER_FACTORY);
         }
         if (tokenizerFactoryClass != null) {
-            try {
-                final Constructor<?> constructor = tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
-                        Environment.class, String.class, Settings.class);
-                tokenizerFactory = (TokenizerFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
-            } catch (final Exception e) {
-                throw new ElasticsearchException("Failed to load " + RELOADABLE_KUROMOJI_TOKENIZER_FACTORY, e);
-            }
+            tokenizerFactory = AccessController.doPrivileged(new PrivilegedAction<TokenizerFactory>() {
+                @Override
+                public TokenizerFactory run() {
+                    try {
+                        final Constructor<?> constructor = tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
+                                Environment.class, String.class, Settings.class);
+                        return (TokenizerFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
+                    } catch (final Exception e) {
+                        throw new ElasticsearchException("Failed to load " + RELOADABLE_KUROMOJI_TOKENIZER_FACTORY, e);
+                    }
+
+                }
+            });
         }
     }
 

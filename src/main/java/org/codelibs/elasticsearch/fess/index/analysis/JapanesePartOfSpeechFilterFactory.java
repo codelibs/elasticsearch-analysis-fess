@@ -17,6 +17,8 @@
 package org.codelibs.elasticsearch.fess.index.analysis;
 
 import java.lang.reflect.Constructor;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
@@ -38,27 +40,32 @@ public class JapanesePartOfSpeechFilterFactory extends AbstractTokenFilterFactor
     private TokenFilterFactory tokenFilterFactory = null;
 
     @Inject
-    public JapanesePartOfSpeechFilterFactory(Index index, IndexSettingsService indexSettingsService, Environment env,
-            @Assisted String name, @Assisted Settings settings, FessAnalysisService fessAnalysisService) {
+    public JapanesePartOfSpeechFilterFactory(final Index index, final IndexSettingsService indexSettingsService, final Environment env,
+            @Assisted final String name, @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        Class<?> TokenFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
+        final Class<?> TokenFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
         if (logger.isInfoEnabled()) {
             logger.info("{} is not found.", KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
         }
         if (TokenFilterFactoryClass != null) {
-            try {
-                final Constructor<?> constructor = TokenFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
-                        Environment.class, String.class, Settings.class);
-                tokenFilterFactory = (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
-            } catch (final Exception e) {
-                throw new ElasticsearchException("Failed to load " + KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY, e);
-            }
+            tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
+                @Override
+                public TokenFilterFactory run() {
+                    try {
+                        final Constructor<?> constructor = TokenFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
+                                Environment.class, String.class, Settings.class);
+                        return (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
+                    } catch (final Exception e) {
+                        throw new ElasticsearchException("Failed to load " + KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY, e);
+                    }
+                }
+            });
         }
     }
 
     @Override
-    public TokenStream create(TokenStream tokenStream) {
+    public TokenStream create(final TokenStream tokenStream) {
         if (tokenFilterFactory != null) {
             return tokenFilterFactory.create(tokenStream);
         }

@@ -17,6 +17,8 @@
 package org.codelibs.elasticsearch.fess.index.analysis;
 
 import java.lang.reflect.Constructor;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
@@ -37,27 +39,33 @@ public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
     private TokenFilterFactory tokenFilterFactory;
 
     @Inject
-    public JapaneseKatakanaStemmerFactory(Index index, IndexSettingsService indexSettingsService, @Assisted String name,
-            @Assisted Settings settings, final FessAnalysisService fessAnalysisService) {
+    public JapaneseKatakanaStemmerFactory(final Index index, final IndexSettingsService indexSettingsService, @Assisted final String name,
+            @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(KUROMOJI_KATAKANA_STEMMER_FACTORY);
+        final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(KUROMOJI_KATAKANA_STEMMER_FACTORY);
         if (logger.isInfoEnabled()) {
             logger.info("{} is not found.", KUROMOJI_KATAKANA_STEMMER_FACTORY);
         }
         if (tokenizerFactoryClass != null) {
-            try {
-                final Constructor<?> constructor =
-                        tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class, String.class, Settings.class);
-                tokenFilterFactory = (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
-            } catch (final Exception e) {
-                throw new ElasticsearchException("Failed to load " + KUROMOJI_KATAKANA_STEMMER_FACTORY, e);
-            }
+            tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
+                @Override
+                public TokenFilterFactory run() {
+                    try {
+                        final Constructor<?> constructor =
+                                tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class, String.class, Settings.class);
+                        return (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
+                    } catch (final Exception e) {
+                        throw new ElasticsearchException("Failed to load " + KUROMOJI_KATAKANA_STEMMER_FACTORY, e);
+                    }
+
+                }
+            });
         }
     }
 
     @Override
-    public TokenStream create(TokenStream tokenStream) {
+    public TokenStream create(final TokenStream tokenStream) {
         if (tokenFilterFactory != null) {
             return tokenFilterFactory.create(tokenStream);
         }

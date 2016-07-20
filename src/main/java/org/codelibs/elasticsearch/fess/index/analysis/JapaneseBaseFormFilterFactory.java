@@ -17,6 +17,8 @@
 package org.codelibs.elasticsearch.fess.index.analysis;
 
 import java.lang.reflect.Constructor;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.apache.lucene.analysis.TokenStream;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
@@ -38,27 +40,32 @@ public class JapaneseBaseFormFilterFactory extends AbstractTokenFilterFactory {
     private TokenFilterFactory tokenFilterFactory = null;
 
     @Inject
-    public JapaneseBaseFormFilterFactory(Index index, IndexSettingsService indexSettingsService, @Assisted String name,
-            @Assisted Settings settings, FessAnalysisService fessAnalysisService) {
+    public JapaneseBaseFormFilterFactory(final Index index, final IndexSettingsService indexSettingsService, @Assisted final String name,
+            @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        Class<?> tokenFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_BASE_FORM_FILTER_FACTORY);
+        final Class<?> tokenFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_BASE_FORM_FILTER_FACTORY);
         if (logger.isInfoEnabled()) {
             logger.info("{} is not found.", KUROMOJI_BASE_FORM_FILTER_FACTORY);
         }
         if (tokenFilterFactoryClass != null) {
-            try {
-                final Constructor<?> constructor = tokenFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
-                        Environment.class, String.class, Settings.class);
-                tokenFilterFactory = (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
-            } catch (final Exception e) {
-                throw new ElasticsearchException("Failed to load " + KUROMOJI_BASE_FORM_FILTER_FACTORY, e);
-            }
+            tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
+                @Override
+                public TokenFilterFactory run() {
+                    try {
+                        final Constructor<?> constructor = tokenFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
+                                Environment.class, String.class, Settings.class);
+                        return (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
+                    } catch (final Exception e) {
+                        throw new ElasticsearchException("Failed to load " + KUROMOJI_BASE_FORM_FILTER_FACTORY, e);
+                    }
+                }
+            });
         }
     }
 
     @Override
-    public TokenStream create(TokenStream tokenStream) {
+    public TokenStream create(final TokenStream tokenStream) {
         if (tokenFilterFactory != null) {
             return tokenFilterFactory.create(tokenStream);
         }
