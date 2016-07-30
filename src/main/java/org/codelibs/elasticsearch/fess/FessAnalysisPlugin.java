@@ -6,7 +6,6 @@ import org.codelibs.elasticsearch.fess.index.analysis.JapaneseBaseFormFilterFact
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseIterationMarkCharFilterFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseKatakanaStemmerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.JapanesePartOfSpeechFilterFactory;
-import org.codelibs.elasticsearch.fess.index.analysis.JapanesePosConcatenationFilterFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseReadingFormFilterFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.KoreanTokenizerFactory;
@@ -55,7 +54,6 @@ public class FessAnalysisPlugin extends Plugin {
         module.addTokenFilter("fess_japanese_readingform", JapaneseReadingFormFilterFactory.class);
         module.addTokenFilter("fess_japanese_stemmer", JapaneseKatakanaStemmerFactory.class);
         module.addTokenizer("fess_japanese_reloadable_tokenizer", ReloadableJapaneseTokenizerFactory.class);
-        module.addTokenFilter("fess_japanese_pos_concat", JapanesePosConcatenationFilterFactory.class);
 
         module.addTokenizer("fess_korean_tokenizer", KoreanTokenizerFactory.class);
     }

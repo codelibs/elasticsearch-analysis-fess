@@ -26,7 +26,6 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.inject.assistedinject.Assisted;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.Index;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
@@ -45,22 +44,24 @@ public class JapaneseBaseFormFilterFactory extends AbstractTokenFilterFactory {
         super(index, indexSettingsService.getSettings(), name, settings);
 
         final Class<?> tokenFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_BASE_FORM_FILTER_FACTORY);
-        if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_BASE_FORM_FILTER_FACTORY);
-        }
         if (tokenFilterFactoryClass != null) {
+            if (logger.isInfoEnabled()) {
+                logger.info("{} is found.", KUROMOJI_BASE_FORM_FILTER_FACTORY);
+            }
             tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
                 @Override
                 public TokenFilterFactory run() {
                     try {
                         final Constructor<?> constructor = tokenFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
-                                Environment.class, String.class, Settings.class);
+                                String.class, Settings.class);
                         return (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
                     } catch (final Exception e) {
                         throw new ElasticsearchException("Failed to load " + KUROMOJI_BASE_FORM_FILTER_FACTORY, e);
                     }
                 }
             });
+        } else if (logger.isInfoEnabled()) {
+            logger.info("{} is not found.", KUROMOJI_BASE_FORM_FILTER_FACTORY);
         }
     }
 

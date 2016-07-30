@@ -44,10 +44,10 @@ public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFa
         super(index, indexSettingsService.getSettings(), name);
 
         final Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY);
-        if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY);
-        }
         if (charFilterFactoryClass != null) {
+            if (logger.isInfoEnabled()) {
+                logger.info("{} is found.", KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY);
+            }
             charFilterFactory = AccessController.doPrivileged(new PrivilegedAction<CharFilterFactory>() {
                 @Override
                 public CharFilterFactory run() {
@@ -60,6 +60,8 @@ public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFa
                     }
                 }
             });
+        } else if (logger.isInfoEnabled()) {
+            logger.info("{} is not found.", KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY);
         }
     }
 

@@ -44,10 +44,10 @@ public class JapaneseReadingFormFilterFactory extends AbstractTokenFilterFactory
         super(index, indexSettingsService.getSettings(), name, settings);
 
         final Class<?> tokenFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_READING_FORM_FILTER_FACTORY);
-        if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_READING_FORM_FILTER_FACTORY);
-        }
         if (tokenFilterFactoryClass != null) {
+            if (logger.isInfoEnabled()) {
+                logger.info("{} is found.", KUROMOJI_READING_FORM_FILTER_FACTORY);
+            }
             tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
                 @Override
                 public TokenFilterFactory run() {
@@ -61,6 +61,8 @@ public class JapaneseReadingFormFilterFactory extends AbstractTokenFilterFactory
 
                 }
             });
+        } else if (logger.isInfoEnabled()) {
+            logger.info("{} is not found.", KUROMOJI_READING_FORM_FILTER_FACTORY);
         }
     }
 

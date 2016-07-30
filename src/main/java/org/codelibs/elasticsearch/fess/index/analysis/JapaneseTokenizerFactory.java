@@ -46,10 +46,10 @@ public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
         super(index, indexSettingsService.getSettings(), name, settings);
 
         final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(KUROMOJI_TOKENIZER_FACTORY);
-        if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_TOKENIZER_FACTORY);
-        }
         if (tokenizerFactoryClass != null) {
+            if (logger.isInfoEnabled()) {
+                logger.info("{} is found.", KUROMOJI_TOKENIZER_FACTORY);
+            }
             tokenizerFactory = AccessController.doPrivileged(new PrivilegedAction<TokenizerFactory>() {
                 @Override
                 public TokenizerFactory run() {
@@ -62,6 +62,8 @@ public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
                     }
                 }
             });
+        } else if (logger.isInfoEnabled()) {
+            logger.info("{} is not found.", KUROMOJI_TOKENIZER_FACTORY);
         }
     }
 

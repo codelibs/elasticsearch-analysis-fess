@@ -44,10 +44,10 @@ public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
         super(index, indexSettingsService.getSettings(), name, settings);
 
         final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(KUROMOJI_KATAKANA_STEMMER_FACTORY);
-        if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_KATAKANA_STEMMER_FACTORY);
-        }
         if (tokenizerFactoryClass != null) {
+            if (logger.isInfoEnabled()) {
+                logger.info("{} is found.", KUROMOJI_KATAKANA_STEMMER_FACTORY);
+            }
             tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
                 @Override
                 public TokenFilterFactory run() {
@@ -61,6 +61,8 @@ public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
 
                 }
             });
+        } else if (logger.isInfoEnabled()) {
+            logger.info("{} is not found.", KUROMOJI_KATAKANA_STEMMER_FACTORY);
         }
     }
 

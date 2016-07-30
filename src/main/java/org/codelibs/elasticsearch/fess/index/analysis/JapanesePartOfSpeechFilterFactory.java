@@ -45,10 +45,10 @@ public class JapanesePartOfSpeechFilterFactory extends AbstractTokenFilterFactor
         super(index, indexSettingsService.getSettings(), name, settings);
 
         final Class<?> TokenFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
-        if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
-        }
         if (TokenFilterFactoryClass != null) {
+            if (logger.isInfoEnabled()) {
+                logger.info("{} is found.", KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
+            }
             tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
                 @Override
                 public TokenFilterFactory run() {
@@ -61,6 +61,8 @@ public class JapanesePartOfSpeechFilterFactory extends AbstractTokenFilterFactor
                     }
                 }
             });
+        } else if (logger.isInfoEnabled()) {
+            logger.info("{} is not found.", KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
         }
     }
 

@@ -46,10 +46,10 @@ public class KoreanTokenizerFactory extends AbstractTokenizerFactory {
         super(index, indexSettingsService.getSettings(), name, settings);
 
         final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(SEUNJEON_TOKENIZER_FACTORY);
-        if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", SEUNJEON_TOKENIZER_FACTORY);
-        }
         if (tokenizerFactoryClass != null) {
+            if (logger.isInfoEnabled()) {
+                logger.info("{} is found.", SEUNJEON_TOKENIZER_FACTORY);
+            }
             tokenizerFactory = AccessController.doPrivileged(new PrivilegedAction<TokenizerFactory>() {
                 @Override
                 public TokenizerFactory run() {
@@ -62,6 +62,8 @@ public class KoreanTokenizerFactory extends AbstractTokenizerFactory {
                     }
                 }
             });
+        } else if (logger.isInfoEnabled()) {
+            logger.info("{} is not found.", SEUNJEON_TOKENIZER_FACTORY);
         }
     }
 
