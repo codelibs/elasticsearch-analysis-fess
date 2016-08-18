@@ -35,8 +35,9 @@ import org.elasticsearch.index.settings.IndexSettingsService;
 
 public class ReloadableJapaneseTokenizerFactory extends AbstractTokenizerFactory {
 
-    private static final String RELOADABLE_KUROMOJI_TOKENIZER_FACTORY =
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.ReloadableKuromojiTokenizerFactory";
+    private static final String[] FACTORIES = new String[] { //
+            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.ReloadableKuromojiTokenizerFactory",
+            "org.codelibs.elasticsearch.ja.analysis.ReloadableKuromojiTokenizerFactory" };
 
     private TokenizerFactory tokenizerFactory = null;
 
@@ -45,26 +46,28 @@ public class ReloadableJapaneseTokenizerFactory extends AbstractTokenizerFactory
             @Assisted final String name, @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(RELOADABLE_KUROMOJI_TOKENIZER_FACTORY);
-        if (tokenizerFactoryClass != null) {
-            if (logger.isInfoEnabled()) {
-                logger.info("{} is found.", RELOADABLE_KUROMOJI_TOKENIZER_FACTORY);
-            }
-            tokenizerFactory = AccessController.doPrivileged(new PrivilegedAction<TokenizerFactory>() {
-                @Override
-                public TokenizerFactory run() {
-                    try {
-                        final Constructor<?> constructor = tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
-                                Environment.class, String.class, Settings.class);
-                        return (TokenizerFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
-                    } catch (final Exception e) {
-                        throw new ElasticsearchException("Failed to load " + RELOADABLE_KUROMOJI_TOKENIZER_FACTORY, e);
-                    }
-
+        for (final String factoryClass : FACTORIES) {
+            final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(factoryClass);
+            if (tokenizerFactoryClass != null) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("{} is found.", factoryClass);
                 }
-            });
-        } else if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", RELOADABLE_KUROMOJI_TOKENIZER_FACTORY);
+                tokenizerFactory = AccessController.doPrivileged(new PrivilegedAction<TokenizerFactory>() {
+                    @Override
+                    public TokenizerFactory run() {
+                        try {
+                            final Constructor<?> constructor = tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
+                                    Environment.class, String.class, Settings.class);
+                            return (TokenizerFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
+                        } catch (final Exception e) {
+                            throw new ElasticsearchException("Failed to load " + factoryClass, e);
+                        }
+
+                    }
+                });
+            } else if (logger.isInfoEnabled()) {
+                logger.info("{} is not found.", factoryClass);
+            }
         }
     }
 

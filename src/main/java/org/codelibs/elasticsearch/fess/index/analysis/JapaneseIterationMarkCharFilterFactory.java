@@ -33,8 +33,9 @@ import org.elasticsearch.index.settings.IndexSettingsService;
 
 public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFactory {
 
-    private static final String KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY =
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiIterationMarkCharFilterFactory";
+    private static final String[] FACTORIES = new String[] { //
+            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiIterationMarkCharFilterFactory",
+            "org.codelibs.elasticsearch.ja.analysis.KuromojiIterationMarkCharFilterFactory" };
 
     private CharFilterFactory charFilterFactory = null;
 
@@ -43,25 +44,27 @@ public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFa
             @Assisted final String name, @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name);
 
-        final Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY);
-        if (charFilterFactoryClass != null) {
-            if (logger.isInfoEnabled()) {
-                logger.info("{} is found.", KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY);
-            }
-            charFilterFactory = AccessController.doPrivileged(new PrivilegedAction<CharFilterFactory>() {
-                @Override
-                public CharFilterFactory run() {
-                    try {
-                        final Constructor<?> constructor = charFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
-                                String.class, Settings.class);
-                        return (CharFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
-                    } catch (final Exception e) {
-                        throw new ElasticsearchException("Failed to load " + KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY, e);
-                    }
+        for (final String factoryClass : FACTORIES) {
+            final Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
+            if (charFilterFactoryClass != null) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("{} is found.", factoryClass);
                 }
-            });
-        } else if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_ITERATION_MARK_CHAR_FILTER_FACTORY);
+                charFilterFactory = AccessController.doPrivileged(new PrivilegedAction<CharFilterFactory>() {
+                    @Override
+                    public CharFilterFactory run() {
+                        try {
+                            final Constructor<?> constructor = charFilterFactoryClass.getConstructor(Index.class,
+                                    IndexSettingsService.class, String.class, Settings.class);
+                            return (CharFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
+                        } catch (final Exception e) {
+                            throw new ElasticsearchException("Failed to load " + factoryClass, e);
+                        }
+                    }
+                });
+            } else if (logger.isInfoEnabled()) {
+                logger.info("{} is not found.", factoryClass);
+            }
         }
     }
 

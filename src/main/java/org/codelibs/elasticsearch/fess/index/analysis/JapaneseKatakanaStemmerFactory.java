@@ -33,8 +33,9 @@ import org.elasticsearch.index.settings.IndexSettingsService;
 
 public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
 
-    private static final String KUROMOJI_KATAKANA_STEMMER_FACTORY =
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiKatakanaStemmerFactory";
+    private static final String[] FACTORIES = new String[] { //
+            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiKatakanaStemmerFactory",
+            "org.codelibs.elasticsearch.ja.analysis.KuromojiKatakanaStemmerFactory" };
 
     private TokenFilterFactory tokenFilterFactory;
 
@@ -43,26 +44,28 @@ public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
             @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(KUROMOJI_KATAKANA_STEMMER_FACTORY);
-        if (tokenizerFactoryClass != null) {
-            if (logger.isInfoEnabled()) {
-                logger.info("{} is found.", KUROMOJI_KATAKANA_STEMMER_FACTORY);
-            }
-            tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
-                @Override
-                public TokenFilterFactory run() {
-                    try {
-                        final Constructor<?> constructor =
-                                tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class, String.class, Settings.class);
-                        return (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
-                    } catch (final Exception e) {
-                        throw new ElasticsearchException("Failed to load " + KUROMOJI_KATAKANA_STEMMER_FACTORY, e);
-                    }
-
+        for (final String factoryClass : FACTORIES) {
+            final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(factoryClass);
+            if (tokenizerFactoryClass != null) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("{} is found.", factoryClass);
                 }
-            });
-        } else if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_KATAKANA_STEMMER_FACTORY);
+                tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
+                    @Override
+                    public TokenFilterFactory run() {
+                        try {
+                            final Constructor<?> constructor = tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
+                                    String.class, Settings.class);
+                            return (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
+                        } catch (final Exception e) {
+                            throw new ElasticsearchException("Failed to load " + factoryClass, e);
+                        }
+
+                    }
+                });
+            } else if (logger.isInfoEnabled()) {
+                logger.info("{} is not found.", factoryClass);
+            }
         }
     }
 

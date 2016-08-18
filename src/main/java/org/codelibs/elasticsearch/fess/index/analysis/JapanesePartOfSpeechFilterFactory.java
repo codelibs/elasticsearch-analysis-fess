@@ -34,8 +34,9 @@ import org.elasticsearch.index.settings.IndexSettingsService;
 
 public class JapanesePartOfSpeechFilterFactory extends AbstractTokenFilterFactory {
 
-    private static final String KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY =
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiPartOfSpeechFilterFactory";
+    private static final String[] FACTORIES = new String[] { //
+            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiPartOfSpeechFilterFactory",
+            "org.codelibs.elasticsearch.ja.analysis.KuromojiPartOfSpeechFilterFactory" };
 
     private TokenFilterFactory tokenFilterFactory = null;
 
@@ -44,25 +45,27 @@ public class JapanesePartOfSpeechFilterFactory extends AbstractTokenFilterFactor
             @Assisted final String name, @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        final Class<?> TokenFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
-        if (TokenFilterFactoryClass != null) {
-            if (logger.isInfoEnabled()) {
-                logger.info("{} is found.", KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
-            }
-            tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
-                @Override
-                public TokenFilterFactory run() {
-                    try {
-                        final Constructor<?> constructor = TokenFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
-                                Environment.class, String.class, Settings.class);
-                        return (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
-                    } catch (final Exception e) {
-                        throw new ElasticsearchException("Failed to load " + KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY, e);
-                    }
+        for (final String factoryClass : FACTORIES) {
+            final Class<?> TokenFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
+            if (TokenFilterFactoryClass != null) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("{} is found.", factoryClass);
                 }
-            });
-        } else if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_PART_OF_SPEECH_FILTER_FACTORY);
+                tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
+                    @Override
+                    public TokenFilterFactory run() {
+                        try {
+                            final Constructor<?> constructor = TokenFilterFactoryClass.getConstructor(Index.class,
+                                    IndexSettingsService.class, Environment.class, String.class, Settings.class);
+                            return (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
+                        } catch (final Exception e) {
+                            throw new ElasticsearchException("Failed to load " + factoryClass, e);
+                        }
+                    }
+                });
+            } else if (logger.isInfoEnabled()) {
+                logger.info("{} is not found.", factoryClass);
+            }
         }
     }
 

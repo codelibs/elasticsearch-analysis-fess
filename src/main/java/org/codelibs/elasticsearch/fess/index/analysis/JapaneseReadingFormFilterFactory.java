@@ -33,8 +33,9 @@ import org.elasticsearch.index.settings.IndexSettingsService;
 
 public class JapaneseReadingFormFilterFactory extends AbstractTokenFilterFactory {
 
-    private static final String KUROMOJI_READING_FORM_FILTER_FACTORY =
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiReadingFormFilterFactory";
+    private static final String[] FACTORIES = new String[] { //
+            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiReadingFormFilterFactory",
+            "org.codelibs.elasticsearch.ja.analysis.KuromojiReadingFormFilterFactory" };
 
     private TokenFilterFactory tokenFilterFactory = null;
 
@@ -43,26 +44,28 @@ public class JapaneseReadingFormFilterFactory extends AbstractTokenFilterFactory
             @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(index, indexSettingsService.getSettings(), name, settings);
 
-        final Class<?> tokenFilterFactoryClass = fessAnalysisService.loadClass(KUROMOJI_READING_FORM_FILTER_FACTORY);
-        if (tokenFilterFactoryClass != null) {
-            if (logger.isInfoEnabled()) {
-                logger.info("{} is found.", KUROMOJI_READING_FORM_FILTER_FACTORY);
-            }
-            tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
-                @Override
-                public TokenFilterFactory run() {
-                    try {
-                        final Constructor<?> constructor = tokenFilterFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
-                                String.class, Settings.class);
-                        return (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
-                    } catch (final Exception e) {
-                        throw new ElasticsearchException("Failed to load " + KUROMOJI_READING_FORM_FILTER_FACTORY, e);
-                    }
-
+        for (final String factoryClass : FACTORIES) {
+            final Class<?> tokenFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
+            if (tokenFilterFactoryClass != null) {
+                if (logger.isInfoEnabled()) {
+                    logger.info("{} is found.", factoryClass);
                 }
-            });
-        } else if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", KUROMOJI_READING_FORM_FILTER_FACTORY);
+                tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
+                    @Override
+                    public TokenFilterFactory run() {
+                        try {
+                            final Constructor<?> constructor = tokenFilterFactoryClass.getConstructor(Index.class,
+                                    IndexSettingsService.class, String.class, Settings.class);
+                            return (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
+                        } catch (final Exception e) {
+                            throw new ElasticsearchException("Failed to load " + factoryClass, e);
+                        }
+
+                    }
+                });
+            } else if (logger.isInfoEnabled()) {
+                logger.info("{} is not found.", factoryClass);
+            }
         }
     }
 
