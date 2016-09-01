@@ -9,7 +9,8 @@ Elasticsearch Analysis Fess Plugin is an analysis library for Fess.
 
 | Version   | Tested On Elasticsearch |
 |:---------:|:-----------------------:|
-| master    | 2.3.X                   |
+| master    | 2.4.X                   |
+| 2.4.0     | 2.4.0                   |
 | 2.3.0     | 2.3.5                   |
 
 ### Issues/Questions
@@ -19,7 +20,7 @@ Please file an [issue](https://github.com/codelibs/elasticsearch-analysis-fess/i
 
 ## Installation
 
-    $ $ES_HOME/bin/plugin install org.codelibs/elasticsearch-analysis-fess/2.3.0
+    $ $ES_HOME/bin/plugin install org.codelibs/elasticsearch-analysis-fess/2.4.0
 
 ## Usage
 
