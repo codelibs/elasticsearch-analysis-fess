@@ -23,14 +23,11 @@ import java.security.PrivilegedAction;
 import org.apache.lucene.analysis.TokenStream;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.inject.assistedinject.Assisted;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
-import org.elasticsearch.index.Index;
+import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
-import org.elasticsearch.index.settings.IndexSettingsService;
 
 public class JapanesePartOfSpeechFilterFactory extends AbstractTokenFilterFactory {
 
@@ -40,10 +37,9 @@ public class JapanesePartOfSpeechFilterFactory extends AbstractTokenFilterFactor
 
     private TokenFilterFactory tokenFilterFactory = null;
 
-    @Inject
-    public JapanesePartOfSpeechFilterFactory(final Index index, final IndexSettingsService indexSettingsService, final Environment env,
-            @Assisted final String name, @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
-        super(index, indexSettingsService.getSettings(), name, settings);
+    public JapanesePartOfSpeechFilterFactory(IndexSettings indexSettings, Environment env, String name, Settings settings,
+            FessAnalysisService fessAnalysisService) {
+        super(indexSettings, name, settings);
 
         for (final String factoryClass : FACTORIES) {
             final Class<?> TokenFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
@@ -55,9 +51,9 @@ public class JapanesePartOfSpeechFilterFactory extends AbstractTokenFilterFactor
                     @Override
                     public TokenFilterFactory run() {
                         try {
-                            final Constructor<?> constructor = TokenFilterFactoryClass.getConstructor(Index.class,
-                                    IndexSettingsService.class, Environment.class, String.class, Settings.class);
-                            return (TokenFilterFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
+                            final Constructor<?> constructor = TokenFilterFactoryClass.getConstructor(IndexSettings.class,
+                                    Environment.class, String.class, Settings.class);
+                            return (TokenFilterFactory) constructor.newInstance(indexSettings, env, name, settings);
                         } catch (final Exception e) {
                             throw new ElasticsearchException("Failed to load " + factoryClass, e);
                         }

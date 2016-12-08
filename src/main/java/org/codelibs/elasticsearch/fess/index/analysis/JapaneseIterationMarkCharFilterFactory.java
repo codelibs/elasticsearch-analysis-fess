@@ -23,13 +23,11 @@ import java.security.PrivilegedAction;
 
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.inject.assistedinject.Assisted;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.index.Index;
+import org.elasticsearch.env.Environment;
+import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractCharFilterFactory;
 import org.elasticsearch.index.analysis.CharFilterFactory;
-import org.elasticsearch.index.settings.IndexSettingsService;
 
 public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFactory {
 
@@ -39,10 +37,9 @@ public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFa
 
     private CharFilterFactory charFilterFactory = null;
 
-    @Inject
-    public JapaneseIterationMarkCharFilterFactory(final Index index, final IndexSettingsService indexSettingsService,
-            @Assisted final String name, @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
-        super(index, indexSettingsService.getSettings(), name);
+    public JapaneseIterationMarkCharFilterFactory(IndexSettings indexSettings, Environment env, String name, Settings settings,
+            FessAnalysisService fessAnalysisService) {
+        super(indexSettings, name);
 
         for (final String factoryClass : FACTORIES) {
             final Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
@@ -54,9 +51,9 @@ public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFa
                     @Override
                     public CharFilterFactory run() {
                         try {
-                            final Constructor<?> constructor = charFilterFactoryClass.getConstructor(Index.class,
-                                    IndexSettingsService.class, String.class, Settings.class);
-                            return (CharFilterFactory) constructor.newInstance(index, indexSettingsService, name, settings);
+                            final Constructor<?> constructor = charFilterFactoryClass.getConstructor(IndexSettings.class,
+                                    Environment.class, String.class, Settings.class);
+                            return (CharFilterFactory) constructor.newInstance(indexSettings, env, name, settings);
                         } catch (final Exception e) {
                             throw new ElasticsearchException("Failed to load " + factoryClass, e);
                         }

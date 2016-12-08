@@ -1,6 +1,13 @@
 package org.codelibs.elasticsearch.fess;
 
+import static java.util.Collections.singletonMap;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseBaseFormFilterFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseIterationMarkCharFilterFactory;
@@ -12,49 +19,123 @@ import org.codelibs.elasticsearch.fess.index.analysis.KoreanTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.ReloadableJapaneseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.module.FessAnalysisModule;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.component.LifecycleComponent;
 import org.elasticsearch.common.inject.Module;
-import org.elasticsearch.index.analysis.AnalysisModule;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.env.Environment;
+import org.elasticsearch.index.IndexSettings;
+import org.elasticsearch.index.analysis.CharFilterFactory;
+import org.elasticsearch.index.analysis.TokenFilterFactory;
+import org.elasticsearch.index.analysis.TokenizerFactory;
+import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
+import org.elasticsearch.plugins.AnalysisPlugin;
 import org.elasticsearch.plugins.Plugin;
+import org.elasticsearch.script.ScriptService;
+import org.elasticsearch.search.SearchRequestParsers;
+import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.watcher.ResourceWatcherService;
 
-import com.google.common.collect.Lists;
+public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin {
 
-public class FessAnalysisPlugin extends Plugin {
+    private PluginComponent pluginComponent = new PluginComponent();
+
     @Override
-    public String name() {
-        return "analysis-fess";
+    public Collection<Module> createGuiceModules() {
+        return Collections.singletonList(new FessAnalysisModule());
     }
 
     @Override
-    public String description() {
-        return "This plugin provides an analysis library for Fess.";
-    }
-
-    @Override
-    public Collection<Module> nodeModules() {
-        final Collection<Module> modules = Lists.newArrayList();
-        modules.add(new FessAnalysisModule());
-        return modules;
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public Collection<Class<? extends LifecycleComponent>> nodeServices() {
-        final Collection<Class<? extends LifecycleComponent>> services = Lists.newArrayList();
+    public Collection<Class<? extends LifecycleComponent>> getGuiceServiceClasses() {
+        Collection<Class<? extends LifecycleComponent>> services = new ArrayList<>();
         services.add(FessAnalysisService.class);
         return services;
     }
 
-    public void onModule(final AnalysisModule module) {
-        module.addCharFilter("fess_japanese_iteration_mark", JapaneseIterationMarkCharFilterFactory.class);
-        //        module.addAnalyzer("kuromoji_neologd", KuromojiAnalyzerProvider.class);
-        module.addTokenizer("fess_japanese_tokenizer", JapaneseTokenizerFactory.class);
-        module.addTokenFilter("fess_japanese_baseform", JapaneseBaseFormFilterFactory.class);
-        module.addTokenFilter("fess_japanese_part_of_speech", JapanesePartOfSpeechFilterFactory.class);
-        module.addTokenFilter("fess_japanese_readingform", JapaneseReadingFormFilterFactory.class);
-        module.addTokenFilter("fess_japanese_stemmer", JapaneseKatakanaStemmerFactory.class);
-        module.addTokenizer("fess_japanese_reloadable_tokenizer", ReloadableJapaneseTokenizerFactory.class);
-
-        module.addTokenizer("fess_korean_tokenizer", KoreanTokenizerFactory.class);
+    @Override
+    public Collection<Object> createComponents(Client client, ClusterService clusterService, ThreadPool threadPool,
+            ResourceWatcherService resourceWatcherService, ScriptService scriptService, SearchRequestParsers searchRequestParsers) {
+        Collection<Object> components = new ArrayList<>();
+        components.add(pluginComponent);
+        return components;
     }
+
+    @Override
+    public Map<String, AnalysisProvider<CharFilterFactory>> getCharFilters() {
+        return singletonMap("fess_japanese_iteration_mark", new AnalysisProvider<CharFilterFactory>() {
+            @Override
+            public CharFilterFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
+                return new JapaneseIterationMarkCharFilterFactory(indexSettings, env, name, settings,
+                        pluginComponent.getFessAnalysisService());
+            }
+        });
+    }
+
+    @Override
+    public Map<String, AnalysisProvider<TokenFilterFactory>> getTokenFilters() {
+        Map<String, AnalysisProvider<TokenFilterFactory>> extra = new HashMap<>();
+        extra.put("fess_japanese_baseform", new AnalysisProvider<TokenFilterFactory>() {
+            @Override
+            public TokenFilterFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
+                return new JapaneseBaseFormFilterFactory(indexSettings, env, name, settings, pluginComponent.getFessAnalysisService());
+            }
+        });
+        extra.put("fess_japanese_part_of_speech", new AnalysisProvider<TokenFilterFactory>() {
+            @Override
+            public TokenFilterFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
+                return new JapanesePartOfSpeechFilterFactory(indexSettings, env, name, settings, pluginComponent.getFessAnalysisService());
+            }
+        });
+        extra.put("fess_japanese_readingform", new AnalysisProvider<TokenFilterFactory>() {
+            @Override
+            public TokenFilterFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
+                return new JapaneseReadingFormFilterFactory(indexSettings, env, name, settings, pluginComponent.getFessAnalysisService());
+            }
+        });
+        extra.put("fess_japanese_stemmer", new AnalysisProvider<TokenFilterFactory>() {
+            @Override
+            public TokenFilterFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
+                return new JapaneseKatakanaStemmerFactory(indexSettings, env, name, settings, pluginComponent.getFessAnalysisService());
+            }
+        });
+        return extra;
+    }
+
+    @Override
+    public Map<String, AnalysisProvider<TokenizerFactory>> getTokenizers() {
+        Map<String, AnalysisProvider<TokenizerFactory>> extra = new HashMap<>();
+        extra.put("fess_japanese_tokenizer", new AnalysisProvider<TokenizerFactory>() {
+            @Override
+            public TokenizerFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
+                return new JapaneseTokenizerFactory(indexSettings, env, name, settings, pluginComponent.getFessAnalysisService());
+            }
+        });
+        extra.put("fess_japanese_reloadable_tokenizer", new AnalysisProvider<TokenizerFactory>() {
+            @Override
+            public TokenizerFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
+                return new ReloadableJapaneseTokenizerFactory(indexSettings, env, name, settings, pluginComponent.getFessAnalysisService());
+            }
+        });
+        extra.put("fess_korean_tokenizer", new AnalysisProvider<TokenizerFactory>() {
+            @Override
+            public TokenizerFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
+                return new KoreanTokenizerFactory(indexSettings, env, name, settings, pluginComponent.getFessAnalysisService());
+            }
+        });
+        return extra;
+    }
+
+    public static class PluginComponent {
+        private FessAnalysisService fessAnalysisService;
+
+        public FessAnalysisService getFessAnalysisService() {
+            return fessAnalysisService;
+        }
+
+        public void setFessAnalysisService(FessAnalysisService fessAnalysisService) {
+            this.fessAnalysisService = fessAnalysisService;
+        }
+    }
+
 }

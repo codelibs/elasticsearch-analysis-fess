@@ -2,7 +2,6 @@ package org.codelibs.elasticsearch.fess;
 
 import static org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner.newConfigs;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Map;
@@ -10,13 +9,13 @@ import java.util.Map;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner;
 import org.codelibs.elasticsearch.runner.net.Curl;
 import org.codelibs.elasticsearch.runner.net.CurlResponse;
+import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.MatchQueryBuilder.Type;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.node.Node;
 import org.junit.After;
@@ -27,7 +26,7 @@ public class FessAnalysisPluginTest {
 
     private ElasticsearchClusterRunner runner;
 
-    private int numOfNode = 2;
+    private int numOfNode = 1;
 
     private int numOfDocs = 1000;
 
@@ -42,14 +41,10 @@ public class FessAnalysisPluginTest {
             public void build(final int number, final Builder settingsBuilder) {
                 settingsBuilder.put("http.cors.enabled", true);
                 settingsBuilder.put("http.cors.allow-origin", "*");
-                settingsBuilder.put("index.number_of_shards", 1);
-                settingsBuilder.put("index.number_of_replicas", 0);
                 settingsBuilder.putArray("discovery.zen.ping.unicast.hosts", "localhost:9301-9310");
-                settingsBuilder.put("plugin.types", "org.codelibs.elasticsearch.fess.FessAnalysisPlugin");
-                settingsBuilder.put("index.unassigned.node_left.delayed_timeout", "0");
             }
-        }).build(newConfigs().clusterName(clusterName).numOfNode(numOfNode));
-
+        }).build(newConfigs().clusterName(clusterName).numOfNode(numOfNode)
+                .pluginTypes("org.codelibs.elasticsearch.fess.FessAnalysisPlugin"));
     }
 
     @After
@@ -99,7 +94,7 @@ public class FessAnalysisPluginTest {
         runner.createMapping(index, type, mappingBuilder);
 
         final IndexResponse indexResponse1 = runner.insert(index, type, "1", "{\"msg\":\"東京スカイツリー\", \"id\":\"1\"}");
-        assertTrue(indexResponse1.isCreated());
+        assertEquals(Result.CREATED, indexResponse1.getResult());
         runner.refresh();
 
         assertDocCount(0, index, type, "msg", "東京スカイツリー");
@@ -115,7 +110,7 @@ public class FessAnalysisPluginTest {
 
     private void assertDocCount(int expected, final String index, final String type, final String field, final String value) {
         final SearchResponse searchResponse =
-                runner.search(index, type, QueryBuilders.matchQuery(field, value).type(Type.PHRASE), null, 0, numOfDocs);
+                runner.search(index, type, QueryBuilders.matchPhraseQuery(field, value), null, 0, numOfDocs);
         assertEquals(expected, searchResponse.getHits().getTotalHits());
     }
 }

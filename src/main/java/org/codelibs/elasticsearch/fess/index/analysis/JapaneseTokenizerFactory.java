@@ -24,14 +24,11 @@ import org.apache.lucene.analysis.Tokenizer;
 import org.codelibs.elasticsearch.fess.analysis.EmptyTokenizer;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.common.inject.Inject;
-import org.elasticsearch.common.inject.assistedinject.Assisted;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
-import org.elasticsearch.index.Index;
+import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenizerFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
-import org.elasticsearch.index.settings.IndexSettingsService;
 
 public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
 
@@ -41,10 +38,9 @@ public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
 
     private TokenizerFactory tokenizerFactory = null;
 
-    @Inject
-    public JapaneseTokenizerFactory(final Index index, final IndexSettingsService indexSettingsService, final Environment env,
-            @Assisted final String name, @Assisted final Settings settings, final FessAnalysisService fessAnalysisService) {
-        super(index, indexSettingsService.getSettings(), name, settings);
+    public JapaneseTokenizerFactory(IndexSettings indexSettings, Environment env, String name, Settings settings,
+            FessAnalysisService fessAnalysisService) {
+        super(indexSettings, name, settings);
 
         for (final String factoryClass : FACTORIES) {
             final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(factoryClass);
@@ -56,9 +52,9 @@ public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
                     @Override
                     public TokenizerFactory run() {
                         try {
-                            final Constructor<?> constructor = tokenizerFactoryClass.getConstructor(Index.class, IndexSettingsService.class,
-                                    Environment.class, String.class, Settings.class);
-                            return (TokenizerFactory) constructor.newInstance(index, indexSettingsService, env, name, settings);
+                            final Constructor<?> constructor = tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class,
+                                    String.class, Settings.class);
+                            return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
                         } catch (final Exception e) {
                             throw new ElasticsearchException("Failed to load " + factoryClass, e);
                         }

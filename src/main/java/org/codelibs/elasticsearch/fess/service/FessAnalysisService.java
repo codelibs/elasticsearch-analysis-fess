@@ -5,6 +5,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.List;
 
+import org.codelibs.elasticsearch.fess.FessAnalysisPlugin;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
@@ -14,21 +15,23 @@ import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.PluginInfo;
 import org.elasticsearch.plugins.PluginsService;
 
-public class FessAnalysisService extends AbstractLifecycleComponent<FessAnalysisService> {
+public class FessAnalysisService extends AbstractLifecycleComponent {
 
     private final PluginsService pluginsService;
 
     private List<Tuple<PluginInfo, Plugin>> plugins;
 
     @Inject
-    public FessAnalysisService(final Settings settings, final PluginsService pluginsService) {
+    public FessAnalysisService(final Settings settings, final PluginsService pluginsService,
+            FessAnalysisPlugin.PluginComponent pluginComponent) {
         super(settings);
         this.pluginsService = pluginsService;
+        pluginComponent.setFessAnalysisService(this);
     }
 
     @Override
     protected void doStart() throws ElasticsearchException {
-        logger.info("START FessAnalysisService");
+        logger.debug("Starting FessAnalysisService");
 
         plugins = loadPlugins();
     }
@@ -51,12 +54,12 @@ public class FessAnalysisService extends AbstractLifecycleComponent<FessAnalysis
 
     @Override
     protected void doStop() throws ElasticsearchException {
-        logger.info("Stopping FessAnalysisService");
+        logger.debug("Stopping FessAnalysisService");
     }
 
     @Override
     protected void doClose() throws ElasticsearchException {
-        logger.info("Closing FessAnalysisService");
+        logger.debug("Closing FessAnalysisService");
     }
 
     public Class<?> loadClass(final String className) {
