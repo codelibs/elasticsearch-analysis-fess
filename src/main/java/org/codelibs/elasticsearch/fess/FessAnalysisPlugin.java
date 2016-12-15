@@ -5,7 +5,6 @@ import static java.util.Collections.singletonMap;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,12 +16,10 @@ import org.codelibs.elasticsearch.fess.index.analysis.JapaneseReadingFormFilterF
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.KoreanTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.ReloadableJapaneseTokenizerFactory;
-import org.codelibs.elasticsearch.fess.module.FessAnalysisModule;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.component.LifecycleComponent;
-import org.elasticsearch.common.inject.Module;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.IndexSettings;
@@ -40,11 +37,6 @@ import org.elasticsearch.watcher.ResourceWatcherService;
 public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin {
 
     private PluginComponent pluginComponent = new PluginComponent();
-
-    @Override
-    public Collection<Module> createGuiceModules() {
-        return Collections.singletonList(new FessAnalysisModule());
-    }
 
     @Override
     public Collection<Class<? extends LifecycleComponent>> getGuiceServiceClasses() {
