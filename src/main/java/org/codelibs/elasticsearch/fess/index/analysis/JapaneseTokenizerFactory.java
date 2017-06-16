@@ -60,8 +60,8 @@ public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
                         }
                     }
                 });
-            } else if (logger.isInfoEnabled()) {
-                logger.info("{} is not found.", factoryClass);
+            } else if (logger.isDebugEnabled()) {
+                logger.debug("{} is not found.", factoryClass);
             }
         }
     }

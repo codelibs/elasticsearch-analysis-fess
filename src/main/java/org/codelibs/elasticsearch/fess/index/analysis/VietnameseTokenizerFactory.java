@@ -57,8 +57,8 @@ public class VietnameseTokenizerFactory extends AbstractTokenizerFactory {
                     }
                 }
             });
-        } else if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", VIETNAMESE_TOKENIZER_FACTORY);
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("{} is not found.", VIETNAMESE_TOKENIZER_FACTORY);
         }
     }
 

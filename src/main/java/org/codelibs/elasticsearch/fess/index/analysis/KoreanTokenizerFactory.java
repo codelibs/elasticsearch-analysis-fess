@@ -58,8 +58,8 @@ public class KoreanTokenizerFactory extends AbstractTokenizerFactory {
                     }
                 }
             });
-        } else if (logger.isInfoEnabled()) {
-            logger.info("{} is not found.", SEUNJEON_TOKENIZER_FACTORY);
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("{} is not found.", SEUNJEON_TOKENIZER_FACTORY);
         }
     }
 
