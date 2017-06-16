@@ -16,6 +16,7 @@ import org.codelibs.elasticsearch.fess.index.analysis.JapaneseReadingFormFilterF
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.KoreanTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.ReloadableJapaneseTokenizerFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.VietnameseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.service.ClusterService;
@@ -114,6 +115,12 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin {
             @Override
             public TokenizerFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
                 return new KoreanTokenizerFactory(indexSettings, env, name, settings, pluginComponent.getFessAnalysisService());
+            }
+        });
+        extra.put("fess_vietnamese_tokenizer", new AnalysisProvider<TokenizerFactory>() {
+            @Override
+            public TokenizerFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
+                return new VietnameseTokenizerFactory(indexSettings, env, name, settings, pluginComponent.getFessAnalysisService());
             }
         });
         return extra;
