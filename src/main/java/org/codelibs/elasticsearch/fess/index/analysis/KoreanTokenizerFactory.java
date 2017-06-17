@@ -32,8 +32,7 @@ import org.elasticsearch.index.analysis.TokenizerFactory;
 
 public class KoreanTokenizerFactory extends AbstractTokenizerFactory {
 
-    private static final String SEUNJEON_TOKENIZER_FACTORY =
-            "org.bitbucket.eunjeon.seunjeon.elasticsearch.index.analysis.SeunjeonTokenizerFactory";
+    private static final String FACTORY = "org.bitbucket.eunjeon.seunjeon.elasticsearch.index.analysis.SeunjeonTokenizerFactory";
 
     private TokenizerFactory tokenizerFactory = null;
 
@@ -41,10 +40,10 @@ public class KoreanTokenizerFactory extends AbstractTokenizerFactory {
             final FessAnalysisService fessAnalysisService) {
         super(indexSettings, name, settings);
 
-        final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(SEUNJEON_TOKENIZER_FACTORY);
+        final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(FACTORY);
         if (tokenizerFactoryClass != null) {
             if (logger.isInfoEnabled()) {
-                logger.info("{} is found.", SEUNJEON_TOKENIZER_FACTORY);
+                logger.info("{} is found.", FACTORY);
             }
             tokenizerFactory = AccessController.doPrivileged((PrivilegedAction<TokenizerFactory>) () -> {
                 try {
@@ -52,11 +51,11 @@ public class KoreanTokenizerFactory extends AbstractTokenizerFactory {
                             tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
                     return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
                 } catch (final Exception e) {
-                    throw new ElasticsearchException("Failed to load " + SEUNJEON_TOKENIZER_FACTORY, e);
+                    throw new ElasticsearchException("Failed to load " + FACTORY, e);
                 }
             });
         } else if (logger.isDebugEnabled()) {
-            logger.debug("{} is not found.", SEUNJEON_TOKENIZER_FACTORY);
+            logger.debug("{} is not found.", FACTORY);
         }
     }
 

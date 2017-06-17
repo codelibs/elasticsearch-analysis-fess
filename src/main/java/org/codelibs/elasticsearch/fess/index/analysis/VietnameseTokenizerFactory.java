@@ -32,7 +32,7 @@ import org.elasticsearch.index.analysis.TokenizerFactory;
 
 public class VietnameseTokenizerFactory extends AbstractTokenizerFactory {
 
-    private static final String VIETNAMESE_TOKENIZER_FACTORY = "org.elasticsearch.index.analysis.VietnameseTokenizerFactory";
+    private static final String FACTORY = "org.elasticsearch.index.analysis.VietnameseTokenizerFactory";
 
     private TokenizerFactory tokenizerFactory = null;
 
@@ -40,10 +40,10 @@ public class VietnameseTokenizerFactory extends AbstractTokenizerFactory {
             final FessAnalysisService fessAnalysisService) {
         super(indexSettings, name, settings);
 
-        final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(VIETNAMESE_TOKENIZER_FACTORY);
+        final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(FACTORY);
         if (tokenizerFactoryClass != null) {
             if (logger.isInfoEnabled()) {
-                logger.info("{} is found.", VIETNAMESE_TOKENIZER_FACTORY);
+                logger.info("{} is found.", FACTORY);
             }
             tokenizerFactory = AccessController.doPrivileged((PrivilegedAction<TokenizerFactory>) () -> {
                 try {
@@ -51,11 +51,11 @@ public class VietnameseTokenizerFactory extends AbstractTokenizerFactory {
                             tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
                     return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
                 } catch (final Exception e) {
-                    throw new ElasticsearchException("Failed to load " + VIETNAMESE_TOKENIZER_FACTORY, e);
+                    throw new ElasticsearchException("Failed to load " + FACTORY, e);
                 }
             });
         } else if (logger.isDebugEnabled()) {
-            logger.debug("{} is not found.", VIETNAMESE_TOKENIZER_FACTORY);
+            logger.debug("{} is not found.", FACTORY);
         }
     }
 
