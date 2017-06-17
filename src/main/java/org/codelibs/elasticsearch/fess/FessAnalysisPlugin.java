@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codelibs.elasticsearch.fess.index.analysis.ChineseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseBaseFormFilterFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseIterationMarkCharFilterFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseKatakanaStemmerFactory;
@@ -121,6 +122,12 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin {
             @Override
             public TokenizerFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
                 return new VietnameseTokenizerFactory(indexSettings, env, name, settings, pluginComponent.getFessAnalysisService());
+            }
+        });
+        extra.put("fess_simplified_chinese_tokenizer", new AnalysisProvider<TokenizerFactory>() {
+            @Override
+            public TokenizerFactory get(IndexSettings indexSettings, Environment env, String name, Settings settings) throws IOException {
+                return new ChineseTokenizerFactory(indexSettings, env, name, settings, pluginComponent.getFessAnalysisService());
             }
         });
         return extra;
