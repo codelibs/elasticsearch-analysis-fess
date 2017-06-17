@@ -1,7 +1,5 @@
 package org.codelibs.elasticsearch.fess;
 
-import static java.util.Collections.singletonMap;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +14,7 @@ import org.codelibs.elasticsearch.fess.index.analysis.JapaneseReadingFormFilterF
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.KoreanTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.ReloadableJapaneseTokenizerFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.TraditionalChineseConvertCharFilterFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.VietnameseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.client.Client;
@@ -54,9 +53,14 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin {
 
     @Override
     public Map<String, AnalysisProvider<CharFilterFactory>> getCharFilters() {
-        return singletonMap("fess_japanese_iteration_mark",
+        final Map<String, AnalysisProvider<CharFilterFactory>> extra = new HashMap<>();
+        extra.put("fess_japanese_iteration_mark",
                 (indexSettings, env, name, settings) -> new JapaneseIterationMarkCharFilterFactory(indexSettings, env, name, settings,
                         pluginComponent.getFessAnalysisService()));
+        extra.put("fess_traditional_chinese_convert",
+                (indexSettings, env, name, settings) -> new TraditionalChineseConvertCharFilterFactory(indexSettings, env, name, settings,
+                        pluginComponent.getFessAnalysisService()));
+        return extra;
     }
 
     @Override
