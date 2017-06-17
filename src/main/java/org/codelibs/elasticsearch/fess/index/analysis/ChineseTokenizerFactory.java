@@ -36,8 +36,8 @@ public class ChineseTokenizerFactory extends AbstractTokenizerFactory {
 
     private TokenizerFactory tokenizerFactory = null;
 
-    public ChineseTokenizerFactory(IndexSettings indexSettings, Environment env, String name, Settings settings,
-            FessAnalysisService fessAnalysisService) {
+    public ChineseTokenizerFactory(final IndexSettings indexSettings, final Environment env, final String name, final Settings settings,
+            final FessAnalysisService fessAnalysisService) {
         super(indexSettings, name, settings);
 
         final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(CHINESE_TOKENIZER_FACTORY);
@@ -45,16 +45,13 @@ public class ChineseTokenizerFactory extends AbstractTokenizerFactory {
             if (logger.isInfoEnabled()) {
                 logger.info("{} is found.", CHINESE_TOKENIZER_FACTORY);
             }
-            tokenizerFactory = AccessController.doPrivileged(new PrivilegedAction<TokenizerFactory>() {
-                @Override
-                public TokenizerFactory run() {
-                    try {
-                        final Constructor<?> constructor =
-                                tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
-                        return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
-                    } catch (final Exception e) {
-                        throw new ElasticsearchException("Failed to load " + CHINESE_TOKENIZER_FACTORY, e);
-                    }
+            tokenizerFactory = AccessController.doPrivileged((PrivilegedAction<TokenizerFactory>) () -> {
+                try {
+                    final Constructor<?> constructor =
+                            tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
+                    return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
+                } catch (final Exception e) {
+                    throw new ElasticsearchException("Failed to load " + CHINESE_TOKENIZER_FACTORY, e);
                 }
             });
         } else if (logger.isDebugEnabled()) {

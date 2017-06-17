@@ -38,8 +38,8 @@ public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
 
     private TokenizerFactory tokenizerFactory = null;
 
-    public JapaneseTokenizerFactory(IndexSettings indexSettings, Environment env, String name, Settings settings,
-            FessAnalysisService fessAnalysisService) {
+    public JapaneseTokenizerFactory(final IndexSettings indexSettings, final Environment env, final String name, final Settings settings,
+            final FessAnalysisService fessAnalysisService) {
         super(indexSettings, name, settings);
 
         for (final String factoryClass : FACTORIES) {
@@ -48,18 +48,16 @@ public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
                 if (logger.isInfoEnabled()) {
                     logger.info("{} is found.", factoryClass);
                 }
-                tokenizerFactory = AccessController.doPrivileged(new PrivilegedAction<TokenizerFactory>() {
-                    @Override
-                    public TokenizerFactory run() {
-                        try {
-                            final Constructor<?> constructor = tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class,
-                                    String.class, Settings.class);
-                            return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
-                        } catch (final Exception e) {
-                            throw new ElasticsearchException("Failed to load " + factoryClass, e);
-                        }
+                tokenizerFactory = AccessController.doPrivileged((PrivilegedAction<TokenizerFactory>) () -> {
+                    try {
+                        final Constructor<?> constructor =
+                                tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
+                        return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
+                    } catch (final Exception e) {
+                        throw new ElasticsearchException("Failed to load " + factoryClass, e);
                     }
                 });
+                break;
             } else if (logger.isDebugEnabled()) {
                 logger.debug("{} is not found.", factoryClass);
             }

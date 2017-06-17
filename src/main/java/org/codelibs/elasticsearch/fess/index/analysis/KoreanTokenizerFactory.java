@@ -37,8 +37,8 @@ public class KoreanTokenizerFactory extends AbstractTokenizerFactory {
 
     private TokenizerFactory tokenizerFactory = null;
 
-    public KoreanTokenizerFactory(IndexSettings indexSettings, Environment env, String name, Settings settings,
-            FessAnalysisService fessAnalysisService) {
+    public KoreanTokenizerFactory(final IndexSettings indexSettings, final Environment env, final String name, final Settings settings,
+            final FessAnalysisService fessAnalysisService) {
         super(indexSettings, name, settings);
 
         final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(SEUNJEON_TOKENIZER_FACTORY);
@@ -46,16 +46,13 @@ public class KoreanTokenizerFactory extends AbstractTokenizerFactory {
             if (logger.isInfoEnabled()) {
                 logger.info("{} is found.", SEUNJEON_TOKENIZER_FACTORY);
             }
-            tokenizerFactory = AccessController.doPrivileged(new PrivilegedAction<TokenizerFactory>() {
-                @Override
-                public TokenizerFactory run() {
-                    try {
-                        final Constructor<?> constructor =
-                                tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
-                        return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
-                    } catch (final Exception e) {
-                        throw new ElasticsearchException("Failed to load " + SEUNJEON_TOKENIZER_FACTORY, e);
-                    }
+            tokenizerFactory = AccessController.doPrivileged((PrivilegedAction<TokenizerFactory>) () -> {
+                try {
+                    final Constructor<?> constructor =
+                            tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
+                    return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
+                } catch (final Exception e) {
+                    throw new ElasticsearchException("Failed to load " + SEUNJEON_TOKENIZER_FACTORY, e);
                 }
             });
         } else if (logger.isDebugEnabled()) {

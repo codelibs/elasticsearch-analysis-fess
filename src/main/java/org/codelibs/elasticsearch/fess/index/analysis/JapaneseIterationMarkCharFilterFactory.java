@@ -37,8 +37,8 @@ public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFa
 
     private CharFilterFactory charFilterFactory = null;
 
-    public JapaneseIterationMarkCharFilterFactory(IndexSettings indexSettings, Environment env, String name, Settings settings,
-            FessAnalysisService fessAnalysisService) {
+    public JapaneseIterationMarkCharFilterFactory(final IndexSettings indexSettings, final Environment env, final String name,
+            final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(indexSettings, name);
 
         for (final String factoryClass : FACTORIES) {
@@ -47,18 +47,16 @@ public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFa
                 if (logger.isInfoEnabled()) {
                     logger.info("{} is found.", factoryClass);
                 }
-                charFilterFactory = AccessController.doPrivileged(new PrivilegedAction<CharFilterFactory>() {
-                    @Override
-                    public CharFilterFactory run() {
-                        try {
-                            final Constructor<?> constructor = charFilterFactoryClass.getConstructor(IndexSettings.class,
-                                    Environment.class, String.class, Settings.class);
-                            return (CharFilterFactory) constructor.newInstance(indexSettings, env, name, settings);
-                        } catch (final Exception e) {
-                            throw new ElasticsearchException("Failed to load " + factoryClass, e);
-                        }
+                charFilterFactory = AccessController.doPrivileged((PrivilegedAction<CharFilterFactory>) () -> {
+                    try {
+                        final Constructor<?> constructor =
+                                charFilterFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
+                        return (CharFilterFactory) constructor.newInstance(indexSettings, env, name, settings);
+                    } catch (final Exception e) {
+                        throw new ElasticsearchException("Failed to load " + factoryClass, e);
                     }
                 });
+                break;
             } else if (logger.isDebugEnabled()) {
                 logger.debug("{} is not found.", factoryClass);
             }

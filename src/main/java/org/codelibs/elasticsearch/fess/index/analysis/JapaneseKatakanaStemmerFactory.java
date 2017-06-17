@@ -37,8 +37,8 @@ public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
 
     private TokenFilterFactory tokenFilterFactory;
 
-    public JapaneseKatakanaStemmerFactory(IndexSettings indexSettings, Environment env, String name, Settings settings,
-            FessAnalysisService fessAnalysisService) {
+    public JapaneseKatakanaStemmerFactory(final IndexSettings indexSettings, final Environment env, final String name,
+            final Settings settings, final FessAnalysisService fessAnalysisService) {
         super(indexSettings, name, settings);
 
         for (final String factoryClass : FACTORIES) {
@@ -47,19 +47,17 @@ public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
                 if (logger.isInfoEnabled()) {
                     logger.info("{} is found.", factoryClass);
                 }
-                tokenFilterFactory = AccessController.doPrivileged(new PrivilegedAction<TokenFilterFactory>() {
-                    @Override
-                    public TokenFilterFactory run() {
-                        try {
-                            final Constructor<?> constructor = tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class,
-                                    String.class, Settings.class);
-                            return (TokenFilterFactory) constructor.newInstance(indexSettings, env, name, settings);
-                        } catch (final Exception e) {
-                            throw new ElasticsearchException("Failed to load " + factoryClass, e);
-                        }
-
+                tokenFilterFactory = AccessController.doPrivileged((PrivilegedAction<TokenFilterFactory>) () -> {
+                    try {
+                        final Constructor<?> constructor =
+                                tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
+                        return (TokenFilterFactory) constructor.newInstance(indexSettings, env, name, settings);
+                    } catch (final Exception e) {
+                        throw new ElasticsearchException("Failed to load " + factoryClass, e);
                     }
+
                 });
+                break;
             } else if (logger.isDebugEnabled()) {
                 logger.debug("{} is not found.", factoryClass);
             }

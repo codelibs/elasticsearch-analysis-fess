@@ -23,7 +23,7 @@ public class FessAnalysisService extends AbstractLifecycleComponent {
 
     @Inject
     public FessAnalysisService(final Settings settings, final PluginsService pluginsService,
-            FessAnalysisPlugin.PluginComponent pluginComponent) {
+            final FessAnalysisPlugin.PluginComponent pluginComponent) {
         super(settings);
         this.pluginsService = pluginsService;
         pluginComponent.setFessAnalysisService(this);
@@ -38,16 +38,13 @@ public class FessAnalysisService extends AbstractLifecycleComponent {
 
     @SuppressWarnings("unchecked")
     private List<Tuple<PluginInfo, Plugin>> loadPlugins() {
-        return AccessController.doPrivileged(new PrivilegedAction<List<Tuple<PluginInfo, Plugin>>>() {
-            @Override
-            public List<Tuple<PluginInfo, Plugin>> run() {
-                try {
-                    final Field pluginsField = pluginsService.getClass().getDeclaredField("plugins");
-                    pluginsField.setAccessible(true);
-                    return (List<Tuple<PluginInfo, Plugin>>) pluginsField.get(pluginsService);
-                } catch (final Exception e) {
-                    throw new ElasticsearchException("Failed to access plugins in PluginsService.", e);
-                }
+        return AccessController.doPrivileged((PrivilegedAction<List<Tuple<PluginInfo, Plugin>>>) () -> {
+            try {
+                final Field pluginsField = pluginsService.getClass().getDeclaredField("plugins");
+                pluginsField.setAccessible(true);
+                return (List<Tuple<PluginInfo, Plugin>>) pluginsField.get(pluginsService);
+            } catch (final Exception e) {
+                throw new ElasticsearchException("Failed to access plugins in PluginsService.", e);
             }
         });
     }
@@ -63,19 +60,16 @@ public class FessAnalysisService extends AbstractLifecycleComponent {
     }
 
     public Class<?> loadClass(final String className) {
-        return AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
-            @Override
-            public Class<?> run() {
-                for (final Tuple<PluginInfo, Plugin> p : plugins) {
-                    final Plugin plugin = p.v2();
-                    try {
-                        return plugin.getClass().getClassLoader().loadClass(className);
-                    } catch (final ClassNotFoundException e) {
-                        // ignore
-                    }
+        return AccessController.doPrivileged((PrivilegedAction<Class<?>>) () -> {
+            for (final Tuple<PluginInfo, Plugin> p : plugins) {
+                final Plugin plugin = p.v2();
+                try {
+                    return plugin.getClass().getClassLoader().loadClass(className);
+                } catch (final ClassNotFoundException e) {
+                    // ignore
                 }
-                return null;
             }
+            return null;
         });
     }
 

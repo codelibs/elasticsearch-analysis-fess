@@ -36,8 +36,8 @@ public class VietnameseTokenizerFactory extends AbstractTokenizerFactory {
 
     private TokenizerFactory tokenizerFactory = null;
 
-    public VietnameseTokenizerFactory(IndexSettings indexSettings, Environment env, String name, Settings settings,
-            FessAnalysisService fessAnalysisService) {
+    public VietnameseTokenizerFactory(final IndexSettings indexSettings, final Environment env, final String name, final Settings settings,
+            final FessAnalysisService fessAnalysisService) {
         super(indexSettings, name, settings);
 
         final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(VIETNAMESE_TOKENIZER_FACTORY);
@@ -45,16 +45,13 @@ public class VietnameseTokenizerFactory extends AbstractTokenizerFactory {
             if (logger.isInfoEnabled()) {
                 logger.info("{} is found.", VIETNAMESE_TOKENIZER_FACTORY);
             }
-            tokenizerFactory = AccessController.doPrivileged(new PrivilegedAction<TokenizerFactory>() {
-                @Override
-                public TokenizerFactory run() {
-                    try {
-                        final Constructor<?> constructor =
-                                tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
-                        return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
-                    } catch (final Exception e) {
-                        throw new ElasticsearchException("Failed to load " + VIETNAMESE_TOKENIZER_FACTORY, e);
-                    }
+            tokenizerFactory = AccessController.doPrivileged((PrivilegedAction<TokenizerFactory>) () -> {
+                try {
+                    final Constructor<?> constructor =
+                            tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
+                    return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
+                } catch (final Exception e) {
+                    throw new ElasticsearchException("Failed to load " + VIETNAMESE_TOKENIZER_FACTORY, e);
                 }
             });
         } else if (logger.isDebugEnabled()) {
