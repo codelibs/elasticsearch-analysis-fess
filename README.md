@@ -7,14 +7,7 @@ Elasticsearch Analysis Fess Plugin is an analysis library for Fess.
 
 ## Version
 
-| Version   | Tested On Elasticsearch |
-|:---------:|:-----------------------:|
-| master    | 5.4.X                   |
-| 5.4.2     | 5.4.1                   |
-| 5.3.0     | 5.3.0                   |
-| 5.0.0     | 5.0.2                   |
-| 2.4.0     | 2.4.0                   |
-| 2.3.0     | 2.3.5                   |
+[Versions in Maven Repository](http://central.maven.org/maven2/org/codelibs/elasticsearch-analysis-fess/)
 
 ### Issues/Questions
 
