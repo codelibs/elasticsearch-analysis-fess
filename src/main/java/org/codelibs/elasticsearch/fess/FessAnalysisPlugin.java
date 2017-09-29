@@ -20,7 +20,10 @@ import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.component.LifecycleComponent;
+import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
+import org.elasticsearch.env.Environment;
+import org.elasticsearch.env.NodeEnvironment;
 import org.elasticsearch.index.analysis.CharFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
@@ -43,9 +46,9 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin {
     }
 
     @Override
-    public Collection<Object> createComponents(final Client client, final ClusterService clusterService, final ThreadPool threadPool,
-            final ResourceWatcherService resourceWatcherService, final ScriptService scriptService,
-            final NamedXContentRegistry xContentRegistry) {
+    public Collection<Object> createComponents(Client client, ClusterService clusterService, ThreadPool threadPool,
+            ResourceWatcherService resourceWatcherService, ScriptService scriptService, NamedXContentRegistry xContentRegistry,
+            Environment environment, NodeEnvironment nodeEnvironment, NamedWriteableRegistry namedWriteableRegistry) {
         final Collection<Object> components = new ArrayList<>();
         components.add(pluginComponent);
         return components;

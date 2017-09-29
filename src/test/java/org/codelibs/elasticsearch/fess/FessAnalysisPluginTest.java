@@ -78,13 +78,12 @@ public class FessAnalysisPluginTest {
 
                 // id
                 .startObject("id")//
-                .field("type", "string")//
-                .field("index", "not_analyzed")//
+                .field("type", "keyword")//
                 .endObject()//
 
                 // msg1
                 .startObject("msg")//
-                .field("type", "string")//
+                .field("type", "text")//
                 .field("analyzer", "ja_analyzer")//
                 .endObject()//
 
@@ -99,8 +98,8 @@ public class FessAnalysisPluginTest {
 
         assertDocCount(0, index, type, "msg", "東京スカイツリー");
 
-        try (CurlResponse response =
-                Curl.post(node, "/" + index + "/_analyze").param("analyzer", "ja_analyzer").body("東京スカイツリー").execute()) {
+        try (CurlResponse response = Curl.post(node, "/" + index + "/_analyze").header("Content-Type", "application/json")
+                .body("{\"text\":\"東京スカイツリー\",\"analyzer\":\"ja_analyzer\"}").execute()) {
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> tokens = (List<Map<String, Object>>) response.getContentAsMap().get("tokens");
             assertEquals(0, tokens.size());
