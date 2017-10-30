@@ -32,7 +32,7 @@ import org.elasticsearch.index.analysis.TokenizerFactory;
 
 public class VietnameseTokenizerFactory extends AbstractTokenizerFactory {
 
-    private static final String FACTORY = "org.elasticsearch.index.analysis.VietnameseTokenizerFactory";
+    private static final String FACTORY = "org.codelibs.elasticsearch.vi.analysis.VietnameseTokenizerFactory";
 
     private TokenizerFactory tokenizerFactory = null;
 
