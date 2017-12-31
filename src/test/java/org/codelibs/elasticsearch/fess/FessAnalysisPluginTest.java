@@ -16,6 +16,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.node.Node;
 import org.junit.After;
@@ -41,7 +42,7 @@ public class FessAnalysisPluginTest {
             public void build(final int number, final Builder settingsBuilder) {
                 settingsBuilder.put("http.cors.enabled", true);
                 settingsBuilder.put("http.cors.allow-origin", "*");
-                settingsBuilder.putArray("discovery.zen.ping.unicast.hosts", "localhost:9301-9310");
+                settingsBuilder.putList("discovery.zen.ping.unicast.hosts", "localhost:9301-9310");
             }
         }).build(newConfigs().clusterName(clusterName).numOfNode(numOfNode)
                 .pluginTypes("org.codelibs.elasticsearch.fess.FessAnalysisPlugin"));
@@ -68,7 +69,7 @@ public class FessAnalysisPluginTest {
                 + "\"analyzer\":{"
                 + "\"ja_analyzer\":{\"type\":\"custom\",\"tokenizer\":\"ja_user_dict\",\"filter\":[\"fess_japanese_stemmer\"]}" + "}"//
                 + "}}}";
-        runner.createIndex(index, Settings.builder().loadFromSource(indexSettings).build());
+        runner.createIndex(index, Settings.builder().loadFromSource(indexSettings, XContentType.JSON).build());
 
         // create a mapping
         final XContentBuilder mappingBuilder = XContentFactory.jsonBuilder()//
