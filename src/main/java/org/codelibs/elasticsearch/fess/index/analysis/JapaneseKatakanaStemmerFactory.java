@@ -33,6 +33,7 @@ public class JapaneseKatakanaStemmerFactory extends AbstractTokenFilterFactory {
 
     private static final String[] FACTORIES = new String[] { //
             "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiKatakanaStemmerFactory",
+            "org.codelibs.elasticsearch.extension.analysis.KuromojiKatakanaStemmerFactory",
             "org.codelibs.elasticsearch.ja.analysis.KuromojiKatakanaStemmerFactory" };
 
     private TokenFilterFactory tokenFilterFactory;

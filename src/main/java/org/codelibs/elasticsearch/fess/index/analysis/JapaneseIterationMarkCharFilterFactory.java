@@ -33,6 +33,7 @@ public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFa
 
     private static final String[] FACTORIES = new String[] { //
             "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiIterationMarkCharFilterFactory",
+            "org.codelibs.elasticsearch.extension.analysis.KuromojiIterationMarkCharFilterFactory",
             "org.codelibs.elasticsearch.ja.analysis.KuromojiIterationMarkCharFilterFactory" };
 
     private CharFilterFactory charFilterFactory = null;
