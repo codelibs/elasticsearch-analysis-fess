@@ -41,8 +41,8 @@ public class TraditionalChineseConvertCharFilterFactory extends AbstractCharFilt
 
         final Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(FACTORY);
         if (charFilterFactoryClass != null) {
-            if (logger.isInfoEnabled()) {
-                logger.info("{} is found.", FACTORY);
+            if (logger.isDebugEnabled()) {
+                logger.debug("{} is found.", FACTORY);
             }
             charFilterFactory = AccessController.doPrivileged((PrivilegedAction<CharFilterFactory>) () -> {
                 try {

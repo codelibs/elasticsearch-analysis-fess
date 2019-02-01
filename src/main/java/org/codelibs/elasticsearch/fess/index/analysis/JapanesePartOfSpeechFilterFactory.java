@@ -45,8 +45,8 @@ public class JapanesePartOfSpeechFilterFactory extends AbstractTokenFilterFactor
         for (final String factoryClass : FACTORIES) {
             final Class<?> TokenFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
             if (TokenFilterFactoryClass != null) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("{} is found.", factoryClass);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("{} is found.", factoryClass);
                 }
                 tokenFilterFactory = AccessController.doPrivileged((PrivilegedAction<TokenFilterFactory>) () -> {
                     try {

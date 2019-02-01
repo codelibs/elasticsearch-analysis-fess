@@ -45,8 +45,8 @@ public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFa
         for (final String factoryClass : FACTORIES) {
             final Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
             if (charFilterFactoryClass != null) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("{} is found.", factoryClass);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("{} is found.", factoryClass);
                 }
                 charFilterFactory = AccessController.doPrivileged((PrivilegedAction<CharFilterFactory>) () -> {
                     try {

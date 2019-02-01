@@ -45,8 +45,8 @@ public class JapaneseBaseFormFilterFactory extends AbstractTokenFilterFactory {
         for (final String factoryClass : FACTORIES) {
             final Class<?> tokenFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
             if (tokenFilterFactoryClass != null) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("{} is found.", factoryClass);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("{} is found.", factoryClass);
                 }
                 tokenFilterFactory = AccessController.doPrivileged((PrivilegedAction<TokenFilterFactory>) () -> {
                     try {
