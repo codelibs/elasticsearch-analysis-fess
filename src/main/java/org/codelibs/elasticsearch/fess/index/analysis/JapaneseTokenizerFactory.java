@@ -46,8 +46,8 @@ public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
         for (final String factoryClass : FACTORIES) {
             final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(factoryClass);
             if (tokenizerFactoryClass != null) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("{} is found.", factoryClass);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("{} is found.", factoryClass);
                 }
                 tokenizerFactory = AccessController.doPrivileged((PrivilegedAction<TokenizerFactory>) () -> {
                     try {

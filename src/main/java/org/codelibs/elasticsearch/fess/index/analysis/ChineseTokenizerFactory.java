@@ -42,8 +42,8 @@ public class ChineseTokenizerFactory extends AbstractTokenizerFactory {
 
         final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(FACTORY);
         if (tokenizerFactoryClass != null) {
-            if (logger.isInfoEnabled()) {
-                logger.info("{} is found.", FACTORY);
+            if (logger.isDebugEnabled()) {
+                logger.debug("{} is found.", FACTORY);
             }
             tokenizerFactory = AccessController.doPrivileged((PrivilegedAction<TokenizerFactory>) () -> {
                 try {
