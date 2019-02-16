@@ -42,7 +42,8 @@ public class FessAnalysisPluginTest {
             public void build(final int number, final Builder settingsBuilder) {
                 settingsBuilder.put("http.cors.enabled", true);
                 settingsBuilder.put("http.cors.allow-origin", "*");
-                settingsBuilder.putList("discovery.zen.ping.unicast.hosts", "localhost:9301-9310");
+                settingsBuilder.putList("discovery.seed_hosts", "127.0.0.1:9301");
+                settingsBuilder.putList("cluster.initial_master_nodes", "127.0.0.1:9301");
             }
         }).build(newConfigs().clusterName(clusterName).numOfNode(numOfNode)
                 .pluginTypes("org.codelibs.elasticsearch.fess.FessAnalysisPlugin"));
@@ -97,7 +98,7 @@ public class FessAnalysisPluginTest {
         assertEquals(Result.CREATED, indexResponse1.getResult());
         runner.refresh();
 
-        assertDocCount(0, index, type, "msg", "東京スカイツリー");
+        assertDocCount(0, index, "msg", "東京スカイツリー");
 
         try (CurlResponse response = EcrCurl.post(node, "/" + index + "/_analyze").header("Content-Type", "application/json")
                 .body("{\"text\":\"東京スカイツリー\",\"analyzer\":\"ja_analyzer\"}").execute()) {
@@ -108,9 +109,9 @@ public class FessAnalysisPluginTest {
 
     }
 
-    private void assertDocCount(int expected, final String index, final String type, final String field, final String value) {
+    private void assertDocCount(int expected, final String index, final String field, final String value) {
         final SearchResponse searchResponse =
-                runner.search(index, type, QueryBuilders.matchPhraseQuery(field, value), null, 0, numOfDocs);
-        assertEquals(expected, searchResponse.getHits().getTotalHits());
+                runner.search(index, QueryBuilders.matchPhraseQuery(field, value), null, 0, numOfDocs);
+        assertEquals(expected, searchResponse.getHits().getTotalHits().value);
     }
 }

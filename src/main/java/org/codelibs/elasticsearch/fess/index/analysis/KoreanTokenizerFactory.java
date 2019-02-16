@@ -38,7 +38,7 @@ public class KoreanTokenizerFactory extends AbstractTokenizerFactory {
 
     public KoreanTokenizerFactory(final IndexSettings indexSettings, final Environment env, final String name, final Settings settings,
             final FessAnalysisService fessAnalysisService) {
-        super(indexSettings, name, settings);
+        super(indexSettings, settings);
 
         final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(FACTORY);
         if (tokenizerFactoryClass != null) {

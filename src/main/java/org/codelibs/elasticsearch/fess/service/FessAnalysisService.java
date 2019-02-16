@@ -27,7 +27,6 @@ public class FessAnalysisService extends AbstractLifecycleComponent {
     @Inject
     public FessAnalysisService(final Settings settings, final PluginsService pluginsService,
             final FessAnalysisPlugin.PluginComponent pluginComponent) {
-        super(settings);
         this.pluginsService = pluginsService;
         pluginComponent.setFessAnalysisService(this);
     }
