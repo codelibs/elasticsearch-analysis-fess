@@ -2,6 +2,7 @@ package org.codelibs.elasticsearch.fess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ import org.codelibs.elasticsearch.fess.index.analysis.KoreanTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.ReloadableJapaneseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.TraditionalChineseConvertCharFilterFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.VietnameseTokenizerFactory;
+import org.codelibs.elasticsearch.fess.index.mapper.LangStringTypeParser;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.service.ClusterService;
@@ -27,14 +29,16 @@ import org.elasticsearch.env.NodeEnvironment;
 import org.elasticsearch.index.analysis.CharFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
+import org.elasticsearch.index.mapper.Mapper;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.AnalysisPlugin;
+import org.elasticsearch.plugins.MapperPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.script.ScriptService;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.watcher.ResourceWatcherService;
 
-public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin {
+public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin, MapperPlugin {
 
     private final PluginComponent pluginComponent = new PluginComponent();
 
@@ -96,6 +100,12 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin {
         extra.put("fess_simplified_chinese_tokenizer", (indexSettings, env, name, settings) -> new ChineseTokenizerFactory(indexSettings,
                 env, name, settings, pluginComponent.getFessAnalysisService()));
         return extra;
+    }
+
+    @Override
+    public Map<String, Mapper.TypeParser> getMappers() {
+        // backward compatibility
+        return Collections.<String, Mapper.TypeParser> singletonMap(LangStringTypeParser.CONTENT_TYPE, new LangStringTypeParser());
     }
 
     public static class PluginComponent {
