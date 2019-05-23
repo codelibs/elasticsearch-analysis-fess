@@ -32,7 +32,7 @@ import org.elasticsearch.index.analysis.TokenizerFactory;
 
 public class KoreanTokenizerFactory extends AbstractTokenizerFactory {
 
-    private static final String FACTORY = "org.bitbucket.eunjeon.seunjeon.elasticsearch.index.analysis.SeunjeonTokenizerFactory";
+    private static final String FACTORY = "org.elasticsearch.index.analysis.NoriTokenizerFactory";
 
     private TokenizerFactory tokenizerFactory = null;
 
