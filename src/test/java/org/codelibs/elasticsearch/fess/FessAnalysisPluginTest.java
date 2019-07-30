@@ -103,7 +103,7 @@ public class FessAnalysisPluginTest {
         try (CurlResponse response = EcrCurl.post(node, "/" + index + "/_analyze").header("Content-Type", "application/json")
                 .body("{\"text\":\"東京スカイツリー\",\"analyzer\":\"ja_analyzer\"}").execute()) {
             @SuppressWarnings("unchecked")
-            List<Map<String, Object>> tokens = (List<Map<String, Object>>) response.getContent(EcrCurl.jsonParser).get("tokens");
+            List<Map<String, Object>> tokens = (List<Map<String, Object>>) response.getContent(EcrCurl.jsonParser()).get("tokens");
             assertEquals(0, tokens.size());
         }
 
