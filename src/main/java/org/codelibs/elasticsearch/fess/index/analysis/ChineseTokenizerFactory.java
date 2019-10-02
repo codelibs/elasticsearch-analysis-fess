@@ -38,7 +38,7 @@ public class ChineseTokenizerFactory extends AbstractTokenizerFactory {
 
     public ChineseTokenizerFactory(final IndexSettings indexSettings, final Environment env, final String name, final Settings settings,
             final FessAnalysisService fessAnalysisService) {
-        super(indexSettings, settings);
+        super(indexSettings, settings, name);
 
         final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(FACTORY);
         if (tokenizerFactoryClass != null) {

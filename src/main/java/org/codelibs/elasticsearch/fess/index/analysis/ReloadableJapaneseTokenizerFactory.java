@@ -42,7 +42,7 @@ public class ReloadableJapaneseTokenizerFactory extends AbstractTokenizerFactory
 
     public ReloadableJapaneseTokenizerFactory(final IndexSettings indexSettings, final Environment env, final String name,
             final Settings settings, final FessAnalysisService fessAnalysisService) {
-        super(indexSettings, settings);
+        super(indexSettings, settings, name);
 
         for (final String factoryClass : FACTORIES) {
             final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(factoryClass);
