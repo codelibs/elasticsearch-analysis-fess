@@ -20,6 +20,7 @@ import org.codelibs.elasticsearch.fess.index.analysis.VietnameseTokenizerFactory
 import org.codelibs.elasticsearch.fess.index.mapper.LangStringTypeParser;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.component.LifecycleComponent;
 import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
@@ -51,8 +52,10 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin, Mapper
 
     @Override
     public Collection<Object> createComponents(Client client, ClusterService clusterService, ThreadPool threadPool,
-            ResourceWatcherService resourceWatcherService, ScriptService scriptService, NamedXContentRegistry xContentRegistry,
-            Environment environment, NodeEnvironment nodeEnvironment, NamedWriteableRegistry namedWriteableRegistry) {
+            ResourceWatcherService resourceWatcherService, ScriptService scriptService,
+            NamedXContentRegistry xContentRegistry, Environment environment,
+            NodeEnvironment nodeEnvironment, NamedWriteableRegistry namedWriteableRegistry,
+            IndexNameExpressionResolver indexNameExpressionResolver) {
         final Collection<Object> components = new ArrayList<>();
         components.add(pluginComponent);
         return components;
