@@ -1,6 +1,7 @@
 package org.codelibs.elasticsearch.fess;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,15 +32,17 @@ import org.elasticsearch.index.analysis.CharFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
 import org.elasticsearch.index.mapper.Mapper;
+import org.elasticsearch.indices.SystemIndexDescriptor;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.AnalysisPlugin;
 import org.elasticsearch.plugins.MapperPlugin;
 import org.elasticsearch.plugins.Plugin;
+import org.elasticsearch.plugins.SystemIndexPlugin;
 import org.elasticsearch.script.ScriptService;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.watcher.ResourceWatcherService;
 
-public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin, MapperPlugin {
+public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin, MapperPlugin, SystemIndexPlugin {
 
     private final PluginComponent pluginComponent = new PluginComponent();
 
@@ -109,6 +112,17 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin, Mapper
     public Map<String, Mapper.TypeParser> getMappers() {
         // backward compatibility
         return Collections.<String, Mapper.TypeParser> singletonMap(LangStringTypeParser.CONTENT_TYPE, new LangStringTypeParser());
+    }
+
+    @Override
+    public Collection<SystemIndexDescriptor> getSystemIndexDescriptors() {
+        return Collections.unmodifiableList(Arrays.asList(//
+                new SystemIndexDescriptor(".suggest", "Contains suggest setting data"), //
+                new SystemIndexDescriptor(".suggest_analyzer", "Contains suggest analyzer data"), //
+                new SystemIndexDescriptor(".suggest_array.*", "Contains suggest setting data"), //
+                new SystemIndexDescriptor(".suggest_badword.*", "Contains suggest badword data"), //
+                new SystemIndexDescriptor(".fess_config.*", "Contains config data for Fess"), //
+                new SystemIndexDescriptor(".fess_user.*", "Contains user data for Fess")));
     }
 
     public static class PluginComponent {
