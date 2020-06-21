@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.codelibs.elasticsearch.fess.index.analysis.ChineseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.JapaneseBaseFormFilterFactory;
@@ -25,6 +26,7 @@ import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.component.LifecycleComponent;
 import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.NamedXContentRegistry;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.env.NodeEnvironment;
@@ -38,6 +40,7 @@ import org.elasticsearch.plugins.AnalysisPlugin;
 import org.elasticsearch.plugins.MapperPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.plugins.SystemIndexPlugin;
+import org.elasticsearch.repositories.RepositoriesService;
 import org.elasticsearch.script.ScriptService;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.watcher.ResourceWatcherService;
@@ -58,7 +61,8 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin, Mapper
             ResourceWatcherService resourceWatcherService, ScriptService scriptService,
             NamedXContentRegistry xContentRegistry, Environment environment,
             NodeEnvironment nodeEnvironment, NamedWriteableRegistry namedWriteableRegistry,
-            IndexNameExpressionResolver indexNameExpressionResolver) {
+            IndexNameExpressionResolver indexNameExpressionResolver,
+            Supplier<RepositoriesService> repositoriesServiceSupplier) {
         final Collection<Object> components = new ArrayList<>();
         components.add(pluginComponent);
         return components;
@@ -115,7 +119,7 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin, Mapper
     }
 
     @Override
-    public Collection<SystemIndexDescriptor> getSystemIndexDescriptors() {
+    public Collection<SystemIndexDescriptor> getSystemIndexDescriptors(Settings settings) {
         return Collections.unmodifiableList(Arrays.asList(//
                 new SystemIndexDescriptor(".crawler.*", "Contains crawler data"), //
                 new SystemIndexDescriptor(".suggest", "Contains suggest setting data"), //
