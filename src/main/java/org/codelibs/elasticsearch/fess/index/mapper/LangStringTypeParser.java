@@ -1,5 +1,6 @@
 package org.codelibs.elasticsearch.fess.index.mapper;
 
+import static org.elasticsearch.index.mapper.TypeParsers.checkNull;
 import static org.elasticsearch.index.mapper.TypeParsers.parseTextField;
 
 import java.util.Iterator;
@@ -10,9 +11,12 @@ import org.elasticsearch.index.mapper.DocumentMapperParser;
 import org.elasticsearch.index.mapper.Mapper;
 import org.elasticsearch.index.mapper.MapperParsingException;
 import org.elasticsearch.index.mapper.TextFieldMapper;
+import org.elasticsearch.index.mapper.TypeParsers;
 import org.elasticsearch.index.mapper.TextFieldMapper.Defaults;
+import org.elasticsearch.index.similarity.SimilarityProvider;
 
 // from org.elasticsearch.index.mapper.TextFieldMapper.TypeParser
+@Deprecated
 public class LangStringTypeParser implements Mapper.TypeParser {
 
     public static final String CONTENT_TYPE = "langstring";
@@ -28,14 +32,14 @@ public class LangStringTypeParser implements Mapper.TypeParser {
     @Override
     public Mapper.Builder parse(String fieldName, Map<String, Object> node, ParserContext parserContext) throws MapperParsingException {
         TextFieldMapper.Builder builder = new TextFieldMapper.Builder(fieldName);
-        builder.fieldType().setIndexAnalyzer(parserContext.getIndexAnalyzers().getDefaultIndexAnalyzer());
-        builder.fieldType().setSearchAnalyzer(parserContext.getIndexAnalyzers().getDefaultSearchAnalyzer());
-        builder.fieldType().setSearchQuoteAnalyzer(parserContext.getIndexAnalyzers().getDefaultSearchQuoteAnalyzer());
-        parseTextField(builder, fieldName, node, parserContext);
+        builder.indexAnalyzer(parserContext.getIndexAnalyzers().getDefaultIndexAnalyzer());
+        builder.searchAnalyzer(parserContext.getIndexAnalyzers().getDefaultSearchAnalyzer());
+        builder.searchQuoteAnalyzer(parserContext.getIndexAnalyzers().getDefaultSearchQuoteAnalyzer());
         for (Iterator<Map.Entry<String, Object>> iterator = node.entrySet().iterator(); iterator.hasNext();) {
             Map.Entry<String, Object> entry = iterator.next();
             String propName = entry.getKey();
             Object propNode = entry.getValue();
+            checkNull(propName, propNode);
             if (propName.equals("position_increment_gap")) {
                 int newPositionIncrementGap = XContentMapValues.nodeIntegerValue(propNode, -1);
                 builder.positionIncrementGap(newPositionIncrementGap);
@@ -47,7 +51,7 @@ public class LangStringTypeParser implements Mapper.TypeParser {
                 builder.eagerGlobalOrdinals(XContentMapValues.nodeBooleanValue(propNode, "eager_global_ordinals"));
                 iterator.remove();
             } else if (propName.equals("fielddata_frequency_filter")) {
-                Map<?, ?> frequencyFilter = (Map<?, ?>) propNode;
+                Map<?,?> frequencyFilter = (Map<?, ?>) propNode;
                 double minFrequency = XContentMapValues.nodeDoubleValue(frequencyFilter.remove("min"), 0);
                 double maxFrequency = XContentMapValues.nodeDoubleValue(frequencyFilter.remove("max"), Integer.MAX_VALUE);
                 int minSegmentSize = XContentMapValues.nodeIntegerValue(frequencyFilter.remove("min_segment_size"), 0);
@@ -56,13 +60,19 @@ public class LangStringTypeParser implements Mapper.TypeParser {
                 iterator.remove();
             } else if (propName.equals("index_prefixes")) {
                 Map<?, ?> indexPrefix = (Map<?, ?>) propNode;
-                int minChars = XContentMapValues.nodeIntegerValue(indexPrefix.remove("min_chars"), Defaults.INDEX_PREFIX_MIN_CHARS);
-                int maxChars = XContentMapValues.nodeIntegerValue(indexPrefix.remove("max_chars"), Defaults.INDEX_PREFIX_MAX_CHARS);
+                int minChars = XContentMapValues.nodeIntegerValue(indexPrefix.remove("min_chars"),
+                    Defaults.INDEX_PREFIX_MIN_CHARS);
+                int maxChars = XContentMapValues.nodeIntegerValue(indexPrefix.remove("max_chars"),
+                    Defaults.INDEX_PREFIX_MAX_CHARS);
                 builder.indexPrefixes(minChars, maxChars);
                 DocumentMapperParser.checkNoRemainingFields(propName, indexPrefix, parserContext.indexVersionCreated());
                 iterator.remove();
             } else if (propName.equals("index_phrases")) {
                 builder.indexPhrases(XContentMapValues.nodeBooleanValue(propNode, "index_phrases"));
+                iterator.remove();
+            } else if (propName.equals("similarity")) {
+                SimilarityProvider similarityProvider = TypeParsers.resolveSimilarity(parserContext, fieldName, propNode.toString());
+                builder.similarity(similarityProvider);
                 iterator.remove();
             } else if (propName.equals(SEPARATOR_SETTING_KEY)) {
                 iterator.remove();
@@ -74,6 +84,7 @@ public class LangStringTypeParser implements Mapper.TypeParser {
                 iterator.remove();
             }
         }
+        parseTextField(builder, fieldName, node, parserContext);
         return builder;
     }
 }
