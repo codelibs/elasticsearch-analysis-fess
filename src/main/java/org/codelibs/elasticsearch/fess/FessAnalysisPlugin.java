@@ -19,7 +19,6 @@ import org.codelibs.elasticsearch.fess.index.analysis.KoreanTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.ReloadableJapaneseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.TraditionalChineseConvertCharFilterFactory;
 import org.codelibs.elasticsearch.fess.index.analysis.VietnameseTokenizerFactory;
-import org.codelibs.elasticsearch.fess.index.mapper.LangStringTypeParser;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
@@ -33,7 +32,6 @@ import org.elasticsearch.env.NodeEnvironment;
 import org.elasticsearch.index.analysis.CharFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
-import org.elasticsearch.index.mapper.Mapper;
 import org.elasticsearch.indices.SystemIndexDescriptor;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.AnalysisPlugin;
@@ -110,12 +108,6 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin, Mapper
         extra.put("fess_simplified_chinese_tokenizer", (indexSettings, env, name, settings) -> new ChineseTokenizerFactory(indexSettings,
                 env, name, settings, pluginComponent.getFessAnalysisService()));
         return extra;
-    }
-
-    @Override
-    public Map<String, Mapper.TypeParser> getMappers() {
-        // backward compatibility
-        return Collections.<String, Mapper.TypeParser> singletonMap(LangStringTypeParser.CONTENT_TYPE, new LangStringTypeParser());
     }
 
     @Override
