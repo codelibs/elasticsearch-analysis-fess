@@ -135,4 +135,14 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin, Mapper
         }
     }
 
+    @Override
+    public String getFeatureName() {
+        return "fess";
+    }
+
+    @Override
+    public String getFeatureDescription() {
+        return "Manages definitions and state for Fess";
+    }
+
 }
