@@ -1,4 +1,5 @@
 Elasticsearch Analysis Fess
+[![Java CI with Maven](https://github.com/codelibs/elasticsearch-analysis-fess/actions/workflows/maven.yml/badge.svg)](https://github.com/codelibs/elasticsearch-analysis-fess/actions/workflows/maven.yml)
 =======================
 
 ## Overview
