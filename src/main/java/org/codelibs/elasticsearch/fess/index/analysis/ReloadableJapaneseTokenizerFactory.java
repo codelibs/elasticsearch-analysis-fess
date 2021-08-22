@@ -35,8 +35,7 @@ public class ReloadableJapaneseTokenizerFactory extends AbstractTokenizerFactory
     private static final String[] FACTORIES = new String[] { //
             "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.ReloadableKuromojiTokenizerFactory",
             "org.codelibs.elasticsearch.extension.analysis.ReloadableKuromojiTokenizerFactory",
-            "org.codelibs.elasticsearch.ja.analysis.ReloadableKuromojiTokenizerFactory",
-            "org.codelibs.elasticsearch.extension.analysis.KuromojiBaseFormFilterFactory" };
+            "org.codelibs.elasticsearch.ja.analysis.ReloadableKuromojiTokenizerFactory" };
 
     private TokenizerFactory tokenizerFactory = null;
 
