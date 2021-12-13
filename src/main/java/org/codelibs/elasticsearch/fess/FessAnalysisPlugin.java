@@ -115,10 +115,6 @@ public class FessAnalysisPlugin extends Plugin implements AnalysisPlugin, Mapper
         return Collections.unmodifiableList(Arrays.asList(//
                 new SystemIndexDescriptor(".crawler.*", "Contains crawler data"), //
                 new SystemIndexDescriptor(".suggest*", "Contains suggest setting data"), //
-                new SystemIndexDescriptor(".suggest_analyzer*", "Contains suggest analyzer data"), //
-                new SystemIndexDescriptor(".suggest_array.*", "Contains suggest setting data"), //
-                new SystemIndexDescriptor(".suggest_badword.*", "Contains suggest badword data"), //
-                new SystemIndexDescriptor(".suggest_elevate.*", "Contains suggest elevate data"), //
                 new SystemIndexDescriptor(".fess_config.*", "Contains config data for Fess"), //
                 new SystemIndexDescriptor(".fess_user.*", "Contains user data for Fess")));
     }
