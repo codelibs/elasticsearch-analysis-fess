@@ -13,17 +13,25 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.elasticsearch.fess.analysis;
+package org.codelibs.elasticsearch.fess.action;
 
 import java.io.IOException;
 
-import org.apache.lucene.analysis.Tokenizer;
+import org.elasticsearch.action.ActionRequest;
+import org.elasticsearch.action.ActionRequestValidationException;
+import org.elasticsearch.common.io.stream.StreamInput;
 
-public class EmptyTokenizer extends Tokenizer {
-
-    @Override
-    public final boolean incrementToken() throws IOException {
-        return false;
+public class AnalysisRequest extends ActionRequest {
+    AnalysisRequest() {
     }
 
+    AnalysisRequest(final StreamInput in) throws IOException {
+        super(in);
+    }
+
+    @Override
+    public ActionRequestValidationException validate() {
+        // TODO
+        return null;
+    }
 }

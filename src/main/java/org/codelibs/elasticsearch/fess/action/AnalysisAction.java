@@ -13,17 +13,15 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-package org.codelibs.elasticsearch.fess.analysis;
+package org.codelibs.elasticsearch.fess.action;
 
-import java.io.IOException;
+import org.elasticsearch.action.ActionType;
 
-import org.apache.lucene.analysis.Tokenizer;
+public class AnalysisAction extends ActionType<AnalysisResponse> {
+    public static final AnalysisAction INSTANCE = new AnalysisAction();
+    public static final String NAME = "cluster:admin/fess/analysis";
 
-public class EmptyTokenizer extends Tokenizer {
-
-    @Override
-    public final boolean incrementToken() throws IOException {
-        return false;
+    private AnalysisAction() {
+        super(NAME, AnalysisResponse::new);
     }
-
 }

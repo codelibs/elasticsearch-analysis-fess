@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2016 the CodeLibs Project and the Others.
+ * Copyright 2012-2022 CodeLibs Project and the Others.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-
 package org.codelibs.elasticsearch.fess.index.analysis;
 
 import java.lang.reflect.Constructor;
@@ -31,7 +30,7 @@ import org.elasticsearch.index.analysis.TokenFilterFactory;
 
 public class JapaneseReadingFormFilterFactory extends AbstractTokenFilterFactory {
 
-    private static final String[] FACTORIES = new String[] { //
+    private static final String[] FACTORIES = { //
             "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiReadingFormFilterFactory",
             "org.codelibs.elasticsearch.extension.analysis.KuromojiReadingFormFilterFactory",
             "org.codelibs.elasticsearch.ja.analysis.KuromojiReadingFormFilterFactory" };
@@ -58,7 +57,8 @@ public class JapaneseReadingFormFilterFactory extends AbstractTokenFilterFactory
                     }
                 });
                 break;
-            } else if (logger.isDebugEnabled()) {
+            }
+            if (logger.isDebugEnabled()) {
                 logger.debug("{} is not found.", factoryClass);
             }
         }
