@@ -29,12 +29,11 @@ import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenizerFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
 
+@Deprecated
 public class ReloadableJapaneseTokenizerFactory extends AbstractTokenizerFactory {
 
     private static final String[] FACTORIES = { //
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.ReloadableKuromojiTokenizerFactory",
-            "org.codelibs.elasticsearch.extension.analysis.ReloadableKuromojiTokenizerFactory",
-            "org.codelibs.elasticsearch.ja.analysis.ReloadableKuromojiTokenizerFactory" };
+            "org.elasticsearch.plugin.analysis.kuromoji.KuromojiTokenizerFactory" };
 
     private TokenizerFactory tokenizerFactory = null;
 

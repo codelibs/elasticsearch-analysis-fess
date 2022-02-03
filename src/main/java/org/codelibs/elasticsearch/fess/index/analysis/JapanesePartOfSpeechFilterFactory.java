@@ -31,9 +31,7 @@ import org.elasticsearch.index.analysis.TokenFilterFactory;
 public class JapanesePartOfSpeechFilterFactory extends AbstractTokenFilterFactory {
 
     private static final String[] FACTORIES = { //
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiPartOfSpeechFilterFactory",
-            "org.codelibs.elasticsearch.extension.analysis.KuromojiPartOfSpeechFilterFactory",
-            "org.codelibs.elasticsearch.ja.analysis.KuromojiPartOfSpeechFilterFactory" };
+            "org.elasticsearch.plugin.analysis.kuromoji.KuromojiPartOfSpeechFilterFactory" };
 
     private TokenFilterFactory tokenFilterFactory = null;
 

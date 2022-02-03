@@ -31,9 +31,7 @@ import org.elasticsearch.index.analysis.CharFilterFactory;
 public class JapaneseIterationMarkCharFilterFactory extends AbstractCharFilterFactory {
 
     private static final String[] FACTORIES = { //
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiIterationMarkCharFilterFactory",
-            "org.codelibs.elasticsearch.extension.analysis.KuromojiIterationMarkCharFilterFactory",
-            "org.codelibs.elasticsearch.ja.analysis.KuromojiIterationMarkCharFilterFactory" };
+            "org.elasticsearch.plugin.analysis.kuromoji.KuromojiIterationMarkCharFilterFactory" };
 
     private CharFilterFactory charFilterFactory = null;
 

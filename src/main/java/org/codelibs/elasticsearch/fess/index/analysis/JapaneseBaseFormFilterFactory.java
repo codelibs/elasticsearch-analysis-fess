@@ -31,9 +31,7 @@ import org.elasticsearch.index.analysis.TokenFilterFactory;
 public class JapaneseBaseFormFilterFactory extends AbstractTokenFilterFactory {
 
     private static final String[] FACTORIES = { //
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiBaseFormFilterFactory",
-            "org.codelibs.elasticsearch.extension.analysis.KuromojiBaseFormFilterFactory",
-            "org.codelibs.elasticsearch.ja.analysis.KuromojiBaseFormFilterFactory" };
+            "org.elasticsearch.plugin.analysis.kuromoji.KuromojiBaseFormFilterFactory" };
 
     private TokenFilterFactory tokenFilterFactory = null;
 

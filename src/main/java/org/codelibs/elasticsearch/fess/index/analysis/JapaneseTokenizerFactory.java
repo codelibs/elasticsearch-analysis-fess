@@ -32,9 +32,7 @@ import org.elasticsearch.index.analysis.TokenizerFactory;
 public class JapaneseTokenizerFactory extends AbstractTokenizerFactory {
 
     private static final String[] FACTORIES = { //
-            "org.codelibs.elasticsearch.kuromoji.neologd.index.analysis.KuromojiTokenizerFactory",
-            "org.codelibs.elasticsearch.extension.analysis.ReloadableKuromojiTokenizerFactory",
-            "org.codelibs.elasticsearch.ja.analysis.ReloadableKuromojiTokenizerFactory" };
+            "org.elasticsearch.plugin.analysis.kuromoji.KuromojiTokenizerFactory" };
 
     private TokenizerFactory tokenizerFactory = null;
 
