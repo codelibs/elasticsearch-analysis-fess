@@ -28,32 +28,34 @@ import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractCharFilterFactory;
 import org.elasticsearch.index.analysis.CharFilterFactory;
 
-public class TraditionalChineseConvertCharFilterFactory extends AbstractCharFilterFactory {
+@SuppressWarnings("removal")
+public class SelectableCharFilterFactory extends AbstractCharFilterFactory {
 
-    private static final String FACTORY = "org.elasticsearch.index.analysis.STConvertCharFilterFactory";
+    protected CharFilterFactory charFilterFactory = null;
 
-    private CharFilterFactory charFilterFactory = null;
-
-    public TraditionalChineseConvertCharFilterFactory(final IndexSettings indexSettings, final Environment env, final String name,
-            final Settings settings, final FessAnalysisService fessAnalysisService) {
+    protected SelectableCharFilterFactory(final IndexSettings indexSettings, final Environment env, final String name,
+            final Settings settings, final FessAnalysisService fessAnalysisService, final String[] factories) {
         super(indexSettings, name);
 
-        final Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(FACTORY);
-        if (charFilterFactoryClass != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("{} is found.", FACTORY);
+        for (final String factoryClass : factories) {
+            final Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
+            if (charFilterFactoryClass != null) {
+                logger.info("[{}] {} is found.", factoryClass);
+                final PrivilegedAction<CharFilterFactory> privilegedAction = (PrivilegedAction<CharFilterFactory>) () -> {
+                    try {
+                        final Constructor<?> constructor =
+                                charFilterFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
+                        return (CharFilterFactory) constructor.newInstance(indexSettings, env, name, settings);
+                    } catch (final Exception e) {
+                        throw new ElasticsearchException("Failed to load " + factoryClass, e);
+                    }
+                };
+                charFilterFactory = AccessController.doPrivileged(privilegedAction);
+                break;
             }
-            charFilterFactory = AccessController.doPrivileged((PrivilegedAction<CharFilterFactory>) () -> {
-                try {
-                    final Constructor<?> constructor =
-                            charFilterFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
-                    return (CharFilterFactory) constructor.newInstance(indexSettings, env, name, settings);
-                } catch (final Exception e) {
-                    throw new ElasticsearchException("Failed to load " + FACTORY, e);
-                }
-            });
-        } else if (logger.isDebugEnabled()) {
-            logger.debug("{} is not found.", FACTORY);
+            if (logger.isDebugEnabled()) {
+                logger.debug("{} is not found.", factoryClass);
+            }
         }
     }
 

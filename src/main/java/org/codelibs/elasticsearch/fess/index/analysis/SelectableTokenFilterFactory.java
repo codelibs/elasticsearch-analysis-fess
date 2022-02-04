@@ -28,32 +28,29 @@ import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 
-public class JapaneseReadingFormFilterFactory extends AbstractTokenFilterFactory {
+@SuppressWarnings("removal")
+public abstract class SelectableTokenFilterFactory extends AbstractTokenFilterFactory {
 
-    private static final String[] FACTORIES = { //
-            "org.elasticsearch.plugin.analysis.kuromoji.KuromojiReadingFormFilterFactory" };
+    protected TokenFilterFactory tokenFilterFactory = null;
 
-    private TokenFilterFactory tokenFilterFactory = null;
-
-    public JapaneseReadingFormFilterFactory(final IndexSettings indexSettings, final Environment env, final String name,
-            final Settings settings, final FessAnalysisService fessAnalysisService) {
+    protected SelectableTokenFilterFactory(final IndexSettings indexSettings, final Environment env, final String name,
+            final Settings settings, final FessAnalysisService fessAnalysisService, final String[] factories) {
         super(indexSettings, name, settings);
 
-        for (final String factoryClass : FACTORIES) {
-            final Class<?> tokenFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
-            if (tokenFilterFactoryClass != null) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("{} is found.", factoryClass);
-                }
-                tokenFilterFactory = AccessController.doPrivileged((PrivilegedAction<TokenFilterFactory>) () -> {
+        for (final String factoryClass : factories) {
+            final Class<?> TokenFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
+            if (TokenFilterFactoryClass != null) {
+                logger.info("[{}] {} is found.", name, factoryClass);
+                final PrivilegedAction<TokenFilterFactory> privilegedAction = (PrivilegedAction<TokenFilterFactory>) () -> {
                     try {
-                        final Constructor<?> constructor = tokenFilterFactoryClass.getConstructor(IndexSettings.class, Environment.class,
+                        final Constructor<?> constructor = TokenFilterFactoryClass.getConstructor(IndexSettings.class, Environment.class,
                                 String.class, Settings.class);
                         return (TokenFilterFactory) constructor.newInstance(indexSettings, env, name, settings);
                     } catch (final Exception e) {
                         throw new ElasticsearchException("Failed to load " + factoryClass, e);
                     }
-                });
+                };
+                tokenFilterFactory = AccessController.doPrivileged(privilegedAction);
                 break;
             }
             if (logger.isDebugEnabled()) {
@@ -69,5 +66,4 @@ public class JapaneseReadingFormFilterFactory extends AbstractTokenFilterFactory
         }
         return tokenStream;
     }
-
 }

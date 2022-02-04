@@ -25,17 +25,22 @@ import java.util.function.Supplier;
 
 import org.codelibs.elasticsearch.fess.action.AnalysisAction;
 import org.codelibs.elasticsearch.fess.action.TransportAnalysisAction;
-import org.codelibs.elasticsearch.fess.index.analysis.ChineseTokenizerFactory;
-import org.codelibs.elasticsearch.fess.index.analysis.JapaneseBaseFormFilterFactory;
-import org.codelibs.elasticsearch.fess.index.analysis.JapaneseIterationMarkCharFilterFactory;
-import org.codelibs.elasticsearch.fess.index.analysis.JapaneseKatakanaStemmerFactory;
-import org.codelibs.elasticsearch.fess.index.analysis.JapanesePartOfSpeechFilterFactory;
-import org.codelibs.elasticsearch.fess.index.analysis.JapaneseReadingFormFilterFactory;
-import org.codelibs.elasticsearch.fess.index.analysis.JapaneseTokenizerFactory;
-import org.codelibs.elasticsearch.fess.index.analysis.KoreanTokenizerFactory;
-import org.codelibs.elasticsearch.fess.index.analysis.ReloadableJapaneseTokenizerFactory;
-import org.codelibs.elasticsearch.fess.index.analysis.TraditionalChineseConvertCharFilterFactory;
-import org.codelibs.elasticsearch.fess.index.analysis.VietnameseTokenizerFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.chinese.ChineseNoOpTokenFilterFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.chinese.ChineseStopTokenFilterFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.chinese.ChineseTokenizerFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.chinese.TraditionalChineseConvertCharFilterFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.japanese.JapaneseBaseFormFilterFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.japanese.JapaneseIterationMarkCharFilterFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.japanese.JapaneseKatakanaStemmerFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.japanese.JapanesePartOfSpeechFilterFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.japanese.JapaneseReadingFormFilterFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.japanese.JapaneseTokenizerFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.japanese.ReloadableJapaneseTokenizerFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.korean.KoreanNumberFilterFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.korean.KoreanPartOfSpeechStopFilterFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.korean.KoreanReadingFormFilterFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.korean.KoreanTokenizerFactory;
+import org.codelibs.elasticsearch.fess.index.analysis.vietnamese.VietnameseTokenizerFactory;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
@@ -58,6 +63,7 @@ import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.watcher.ResourceWatcherService;
 import org.elasticsearch.xcontent.NamedXContentRegistry;
 
+@SuppressWarnings("deprecation")
 public class FessAnalysisPlugin extends Plugin implements ActionPlugin, AnalysisPlugin {
 
     private FessAnalysisService service;
@@ -101,6 +107,16 @@ public class FessAnalysisPlugin extends Plugin implements ActionPlugin, Analysis
                 (indexSettings, env, name, settings) -> new JapaneseReadingFormFilterFactory(indexSettings, env, name, settings, service));
         extra.put("fess_japanese_stemmer",
                 (indexSettings, env, name, settings) -> new JapaneseKatakanaStemmerFactory(indexSettings, env, name, settings, service));
+        extra.put("fess_simplified_chinese_stop",
+                (indexSettings, env, name, settings) -> new ChineseStopTokenFilterFactory(indexSettings, env, name, settings, service));
+        extra.put("fess_simplified_chinese_noop",
+                (indexSettings, env, name, settings) -> new ChineseNoOpTokenFilterFactory(indexSettings, env, name, settings, service));
+        extra.put("fess_korean_number",
+                (indexSettings, env, name, settings) -> new KoreanNumberFilterFactory(indexSettings, env, name, settings, service));
+        extra.put("fess_korean_part_of_speech",
+                (indexSettings, env, name, settings) -> new KoreanPartOfSpeechStopFilterFactory(indexSettings, env, name, settings, service));
+        extra.put("fess_korean_readingform",
+                (indexSettings, env, name, settings) -> new KoreanReadingFormFilterFactory(indexSettings, env, name, settings, service));
         return extra;
     }
 

@@ -29,32 +29,34 @@ import org.elasticsearch.index.IndexSettings;
 import org.elasticsearch.index.analysis.AbstractTokenizerFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
 
-public class VietnameseTokenizerFactory extends AbstractTokenizerFactory {
+@SuppressWarnings("removal")
+public abstract class SelectableTokenizerFactory extends AbstractTokenizerFactory {
 
-    private static final String FACTORY = "org.codelibs.elasticsearch.vi.analysis.VietnameseTokenizerFactory";
+    protected TokenizerFactory tokenizerFactory = null;
 
-    private TokenizerFactory tokenizerFactory = null;
-
-    public VietnameseTokenizerFactory(final IndexSettings indexSettings, final Environment env, final String name, final Settings settings,
-            final FessAnalysisService fessAnalysisService) {
+    protected SelectableTokenizerFactory(final IndexSettings indexSettings, final Environment env, final String name,
+            final Settings settings, final FessAnalysisService fessAnalysisService, final String[] factories) {
         super(indexSettings, settings, name);
 
-        final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(FACTORY);
-        if (tokenizerFactoryClass != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("{} is found.", FACTORY);
+        for (final String factoryClass : factories) {
+            final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(factoryClass);
+            if (tokenizerFactoryClass != null) {
+                logger.info("[{}] {} is found.", name, factoryClass);
+                final PrivilegedAction<TokenizerFactory> privilegedAction = (PrivilegedAction<TokenizerFactory>) () -> {
+                    try {
+                        final Constructor<?> constructor =
+                                tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
+                        return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
+                    } catch (final Exception e) {
+                        throw new ElasticsearchException("Failed to load " + factoryClass, e);
+                    }
+                };
+                tokenizerFactory = AccessController.doPrivileged(privilegedAction);
+                break;
             }
-            tokenizerFactory = AccessController.doPrivileged((PrivilegedAction<TokenizerFactory>) () -> {
-                try {
-                    final Constructor<?> constructor =
-                            tokenizerFactoryClass.getConstructor(IndexSettings.class, Environment.class, String.class, Settings.class);
-                    return (TokenizerFactory) constructor.newInstance(indexSettings, env, name, settings);
-                } catch (final Exception e) {
-                    throw new ElasticsearchException("Failed to load " + FACTORY, e);
-                }
-            });
-        } else if (logger.isDebugEnabled()) {
-            logger.debug("{} is not found.", FACTORY);
+            if (logger.isDebugEnabled()) {
+                logger.debug("{} is not found.", factoryClass);
+            }
         }
     }
 
