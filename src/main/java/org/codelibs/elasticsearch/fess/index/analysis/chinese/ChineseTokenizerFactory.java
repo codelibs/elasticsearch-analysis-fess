@@ -24,7 +24,7 @@ import org.elasticsearch.index.IndexSettings;
 public class ChineseTokenizerFactory extends SelectableTokenizerFactory {
 
     private static final String[] FACTORIES = { //
-            "org.elasticsearch.index.analysis.SmartChineseTokenizerTokenizerFactory" };
+            "org.elasticsearch.plugin.analysis.smartcn.SmartChineseTokenizerTokenizerFactory" };
 
     public ChineseTokenizerFactory(final IndexSettings indexSettings, final Environment env, final String name, final Settings settings,
             final FessAnalysisService fessAnalysisService) {
