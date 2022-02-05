@@ -55,7 +55,7 @@ public abstract class SelectableTokenizerFactory extends AbstractTokenizerFactor
                 break;
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("{} is not found.", factoryClass);
+                logger.debug("[{}] {} is not found.", name, factoryClass);
             }
         }
     }

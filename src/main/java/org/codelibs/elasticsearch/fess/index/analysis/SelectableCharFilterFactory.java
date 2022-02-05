@@ -40,7 +40,7 @@ public class SelectableCharFilterFactory extends AbstractCharFilterFactory {
         for (final String factoryClass : factories) {
             final Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
             if (charFilterFactoryClass != null) {
-                logger.info("[{}] {} is found.", factoryClass);
+                logger.info("[{}] {} is found.", name, factoryClass);
                 final PrivilegedAction<CharFilterFactory> privilegedAction = (PrivilegedAction<CharFilterFactory>) () -> {
                     try {
                         final Constructor<?> constructor =
@@ -54,7 +54,7 @@ public class SelectableCharFilterFactory extends AbstractCharFilterFactory {
                 break;
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("{} is not found.", factoryClass);
+                logger.debug("[{}] {} is not found.", name, factoryClass);
             }
         }
     }

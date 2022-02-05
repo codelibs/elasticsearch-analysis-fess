@@ -54,7 +54,7 @@ public abstract class SelectableTokenFilterFactory extends AbstractTokenFilterFa
                 break;
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("{} is not found.", factoryClass);
+                logger.debug("[{}] {} is not found.", name, factoryClass);
             }
         }
     }
