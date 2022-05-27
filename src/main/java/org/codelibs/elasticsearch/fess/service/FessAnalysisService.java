@@ -26,7 +26,7 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
 import org.elasticsearch.core.Tuple;
 import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.plugins.PluginInfo;
+import org.elasticsearch.plugins.PluginDescriptor;
 import org.elasticsearch.plugins.PluginsService;
 
 public class FessAnalysisService extends AbstractLifecycleComponent {
@@ -34,7 +34,7 @@ public class FessAnalysisService extends AbstractLifecycleComponent {
 
     private PluginsService pluginsService;
 
-    private List<Tuple<PluginInfo, Plugin>> plugins;
+    private List<Tuple<PluginDescriptor, Plugin>> plugins;
 
     @Override
     protected void doStart() throws ElasticsearchException {
@@ -53,12 +53,12 @@ public class FessAnalysisService extends AbstractLifecycleComponent {
         logger.debug("Closing FessAnalysisService");
     }
 
-    private List<Tuple<PluginInfo, Plugin>> loadPlugins() {
-        return AccessController.doPrivileged((PrivilegedAction<List<Tuple<PluginInfo, Plugin>>>) () -> {
+    private List<Tuple<PluginDescriptor, Plugin>> loadPlugins() {
+        return AccessController.doPrivileged((PrivilegedAction<List<Tuple<PluginDescriptor, Plugin>>>) () -> {
             try {
                 final Field pluginsField = pluginsService.getClass().getDeclaredField("plugins");
                 pluginsField.setAccessible(true);
-                return (List<Tuple<PluginInfo, Plugin>>) pluginsField.get(pluginsService);
+                return (List<Tuple<PluginDescriptor, Plugin>>) pluginsField.get(pluginsService);
             } catch (final Exception e) {
                 throw new ElasticsearchException("Failed to access plugins in PluginsService.", e);
             }
@@ -67,7 +67,7 @@ public class FessAnalysisService extends AbstractLifecycleComponent {
 
     public Class<?> loadClass(final String className) {
         return AccessController.doPrivileged((PrivilegedAction<Class<?>>) () -> {
-            for (final Tuple<PluginInfo, Plugin> p : plugins) {
+            for (final Tuple<PluginDescriptor, Plugin> p : plugins) {
                 final Plugin plugin = p.v2();
                 try {
                     return plugin.getClass().getClassLoader().loadClass(className);
