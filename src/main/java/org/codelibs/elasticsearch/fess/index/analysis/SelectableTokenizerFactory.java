@@ -19,10 +19,12 @@ import java.lang.reflect.Constructor;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.analysis.Tokenizer;
 import org.codelibs.elasticsearch.fess.analysis.EmptyTokenizer;
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.IndexSettings;
@@ -37,6 +39,8 @@ public abstract class SelectableTokenizerFactory extends AbstractTokenizerFactor
     protected SelectableTokenizerFactory(final IndexSettings indexSettings, final Environment env, final String name,
             final Settings settings, final FessAnalysisService fessAnalysisService, final String[] factories) {
         super(indexSettings, settings, name);
+
+        final Logger logger = Loggers.getLogger(getClass(), indexSettings.getIndex());
 
         for (final String factoryClass : factories) {
             final Class<?> tokenizerFactoryClass = fessAnalysisService.loadClass(factoryClass);

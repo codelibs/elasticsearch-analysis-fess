@@ -15,18 +15,14 @@
  */
 package org.codelibs.elasticsearch.fess.service;
 
-import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.component.AbstractLifecycleComponent;
-import org.elasticsearch.core.Tuple;
 import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.plugins.PluginDescriptor;
 import org.elasticsearch.plugins.PluginsService;
 
 public class FessAnalysisService extends AbstractLifecycleComponent {
@@ -34,13 +30,13 @@ public class FessAnalysisService extends AbstractLifecycleComponent {
 
     private PluginsService pluginsService;
 
-    private List<Tuple<PluginDescriptor, Plugin>> plugins;
+    private Plugin[] plugins;
 
     @Override
     protected void doStart() throws ElasticsearchException {
         logger.debug("Starting FessAnalysisService");
 
-        plugins = loadPlugins();
+        plugins = pluginsService.pluginMap().values().toArray(n -> new Plugin[n]);
     }
 
     @Override
@@ -53,22 +49,9 @@ public class FessAnalysisService extends AbstractLifecycleComponent {
         logger.debug("Closing FessAnalysisService");
     }
 
-    private List<Tuple<PluginDescriptor, Plugin>> loadPlugins() {
-        return AccessController.doPrivileged((PrivilegedAction<List<Tuple<PluginDescriptor, Plugin>>>) () -> {
-            try {
-                final Field pluginsField = pluginsService.getClass().getDeclaredField("plugins");
-                pluginsField.setAccessible(true);
-                return (List<Tuple<PluginDescriptor, Plugin>>) pluginsField.get(pluginsService);
-            } catch (final Exception e) {
-                throw new ElasticsearchException("Failed to access plugins in PluginsService.", e);
-            }
-        });
-    }
-
     public Class<?> loadClass(final String className) {
         return AccessController.doPrivileged((PrivilegedAction<Class<?>>) () -> {
-            for (final Tuple<PluginDescriptor, Plugin> p : plugins) {
-                final Plugin plugin = p.v2();
+            for (final Plugin plugin : plugins) {
                 try {
                     return plugin.getClass().getClassLoader().loadClass(className);
                 } catch (final ClassNotFoundException e) {
