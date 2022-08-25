@@ -35,12 +35,11 @@ public abstract class SelectableTokenFilterFactory extends AbstractTokenFilterFa
 
     protected SelectableTokenFilterFactory(final IndexSettings indexSettings, final Environment env, final String name,
             final Settings settings, final FessAnalysisService fessAnalysisService, final String[] factories) {
-        super(indexSettings, name, settings);
+        super(name, settings);
 
         for (final String factoryClass : factories) {
             final Class<?> TokenFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
             if (TokenFilterFactoryClass != null) {
-                logger.info("[{}] {} is found.", name, factoryClass);
                 final PrivilegedAction<TokenFilterFactory> privilegedAction = (PrivilegedAction<TokenFilterFactory>) () -> {
                     try {
                         final Constructor<?> constructor = TokenFilterFactoryClass.getConstructor(IndexSettings.class, Environment.class,
@@ -52,9 +51,6 @@ public abstract class SelectableTokenFilterFactory extends AbstractTokenFilterFa
                 };
                 tokenFilterFactory = AccessController.doPrivileged(privilegedAction);
                 break;
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("[{}] {} is not found.", name, factoryClass);
             }
         }
     }

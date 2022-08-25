@@ -35,12 +35,11 @@ public class SelectableCharFilterFactory extends AbstractCharFilterFactory {
 
     protected SelectableCharFilterFactory(final IndexSettings indexSettings, final Environment env, final String name,
             final Settings settings, final FessAnalysisService fessAnalysisService, final String[] factories) {
-        super(indexSettings, name);
+        super(name);
 
         for (final String factoryClass : factories) {
             final Class<?> charFilterFactoryClass = fessAnalysisService.loadClass(factoryClass);
             if (charFilterFactoryClass != null) {
-                logger.info("[{}] {} is found.", name, factoryClass);
                 final PrivilegedAction<CharFilterFactory> privilegedAction = (PrivilegedAction<CharFilterFactory>) () -> {
                     try {
                         final Constructor<?> constructor =
@@ -52,9 +51,6 @@ public class SelectableCharFilterFactory extends AbstractCharFilterFactory {
                 };
                 charFilterFactory = AccessController.doPrivileged(privilegedAction);
                 break;
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("[{}] {} is not found.", name, factoryClass);
             }
         }
     }
