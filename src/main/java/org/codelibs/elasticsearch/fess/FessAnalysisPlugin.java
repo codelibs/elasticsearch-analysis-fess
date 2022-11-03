@@ -46,6 +46,7 @@ import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
+import org.elasticsearch.cluster.routing.allocation.decider.AllocationDeciders;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
 import org.elasticsearch.env.Environment;
@@ -80,7 +81,8 @@ public class FessAnalysisPlugin extends Plugin implements ActionPlugin, Analysis
             final ResourceWatcherService resourceWatcherService, final ScriptService scriptService,
             final NamedXContentRegistry xContentRegistry, final Environment environment, final NodeEnvironment nodeEnvironment,
             final NamedWriteableRegistry namedWriteableRegistry, final IndexNameExpressionResolver indexNameExpressionResolver,
-            final Supplier<RepositoriesService> repositoriesServiceSupplier, final Tracer tracer) {
+            final Supplier<RepositoriesService> repositoriesServiceSupplier, final Tracer tracer,
+            final AllocationDeciders allocationDeciders) {
         final Collection<Object> components = new ArrayList<>();
         service = new FessAnalysisService();
         components.add(service);
@@ -114,8 +116,8 @@ public class FessAnalysisPlugin extends Plugin implements ActionPlugin, Analysis
                 (indexSettings, env, name, settings) -> new ChineseNoOpTokenFilterFactory(indexSettings, env, name, settings, service));
         extra.put("fess_korean_number",
                 (indexSettings, env, name, settings) -> new KoreanNumberFilterFactory(indexSettings, env, name, settings, service));
-        extra.put("fess_korean_part_of_speech",
-                (indexSettings, env, name, settings) -> new KoreanPartOfSpeechStopFilterFactory(indexSettings, env, name, settings, service));
+        extra.put("fess_korean_part_of_speech", (indexSettings, env, name,
+                settings) -> new KoreanPartOfSpeechStopFilterFactory(indexSettings, env, name, settings, service));
         extra.put("fess_korean_readingform",
                 (indexSettings, env, name, settings) -> new KoreanReadingFormFilterFactory(indexSettings, env, name, settings, service));
         return extra;
