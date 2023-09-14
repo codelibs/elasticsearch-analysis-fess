@@ -54,6 +54,7 @@ import org.elasticsearch.env.NodeEnvironment;
 import org.elasticsearch.index.analysis.CharFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
+import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.ActionPlugin;
 import org.elasticsearch.plugins.AnalysisPlugin;
@@ -82,7 +83,7 @@ public class FessAnalysisPlugin extends Plugin implements ActionPlugin, Analysis
             final NamedXContentRegistry xContentRegistry, final Environment environment, final NodeEnvironment nodeEnvironment,
             final NamedWriteableRegistry namedWriteableRegistry, final IndexNameExpressionResolver indexNameExpressionResolver,
             final Supplier<RepositoriesService> repositoriesServiceSupplier, final Tracer tracer,
-            final AllocationService allocationService) {
+            final AllocationService allocationService, final IndicesService indicesService) {
         final Collection<Object> components = new ArrayList<>();
         service = new FessAnalysisService();
         components.add(service);
