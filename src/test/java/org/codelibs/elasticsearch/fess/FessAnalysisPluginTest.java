@@ -24,8 +24,8 @@ import java.util.Map;
 import org.codelibs.curl.CurlResponse;
 import org.codelibs.elasticsearch.runner.ElasticsearchClusterRunner;
 import org.codelibs.elasticsearch.runner.net.EcrCurl;
+import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.DocWriteResponse.Result;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
@@ -107,7 +107,7 @@ public class FessAnalysisPluginTest {
                 .endObject();
         runner.createMapping(index, mappingBuilder);
 
-        final IndexResponse indexResponse1 = runner.insert(index, "1", "{\"msg\":\"東京スカイツリー\", \"id\":\"1\"}");
+        final DocWriteResponse indexResponse1 = runner.insert(index, "1", "{\"msg\":\"東京スカイツリー\", \"id\":\"1\"}");
         assertEquals(Result.CREATED, indexResponse1.getResult());
         runner.refresh();
 

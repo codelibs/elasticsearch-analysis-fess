@@ -61,8 +61,8 @@ import org.elasticsearch.plugins.AnalysisPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.repositories.RepositoriesService;
 import org.elasticsearch.script.ScriptService;
+import org.elasticsearch.telemetry.TelemetryProvider;
 import org.elasticsearch.threadpool.ThreadPool;
-import org.elasticsearch.tracing.Tracer;
 import org.elasticsearch.watcher.ResourceWatcherService;
 import org.elasticsearch.xcontent.NamedXContentRegistry;
 
@@ -82,7 +82,7 @@ public class FessAnalysisPlugin extends Plugin implements ActionPlugin, Analysis
             final ResourceWatcherService resourceWatcherService, final ScriptService scriptService,
             final NamedXContentRegistry xContentRegistry, final Environment environment, final NodeEnvironment nodeEnvironment,
             final NamedWriteableRegistry namedWriteableRegistry, final IndexNameExpressionResolver indexNameExpressionResolver,
-            final Supplier<RepositoriesService> repositoriesServiceSupplier, final Tracer tracer,
+            final Supplier<RepositoriesService> repositoriesServiceSupplier, final TelemetryProvider telemetryProvider,
             final AllocationService allocationService, final IndicesService indicesService) {
         final Collection<Object> components = new ArrayList<>();
         service = new FessAnalysisService();
