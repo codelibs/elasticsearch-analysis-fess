@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import org.codelibs.elasticsearch.fess.action.AnalysisAction;
 import org.codelibs.elasticsearch.fess.action.TransportAnalysisAction;
@@ -44,27 +43,13 @@ import org.codelibs.elasticsearch.fess.index.analysis.vietnamese.VietnameseToken
 import org.codelibs.elasticsearch.fess.service.FessAnalysisService;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionResponse;
-import org.elasticsearch.client.internal.Client;
-import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
-import org.elasticsearch.cluster.routing.allocation.AllocationService;
-import org.elasticsearch.cluster.service.ClusterService;
-import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
-import org.elasticsearch.env.Environment;
-import org.elasticsearch.env.NodeEnvironment;
 import org.elasticsearch.index.analysis.CharFilterFactory;
 import org.elasticsearch.index.analysis.TokenFilterFactory;
 import org.elasticsearch.index.analysis.TokenizerFactory;
-import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.indices.analysis.AnalysisModule.AnalysisProvider;
 import org.elasticsearch.plugins.ActionPlugin;
 import org.elasticsearch.plugins.AnalysisPlugin;
 import org.elasticsearch.plugins.Plugin;
-import org.elasticsearch.repositories.RepositoriesService;
-import org.elasticsearch.script.ScriptService;
-import org.elasticsearch.telemetry.TelemetryProvider;
-import org.elasticsearch.threadpool.ThreadPool;
-import org.elasticsearch.watcher.ResourceWatcherService;
-import org.elasticsearch.xcontent.NamedXContentRegistry;
 
 @SuppressWarnings("deprecation")
 public class FessAnalysisPlugin extends Plugin implements ActionPlugin, AnalysisPlugin {
@@ -78,12 +63,7 @@ public class FessAnalysisPlugin extends Plugin implements ActionPlugin, Analysis
     }
 
     @Override
-    public Collection<Object> createComponents(final Client client, final ClusterService clusterService, final ThreadPool threadPool,
-            final ResourceWatcherService resourceWatcherService, final ScriptService scriptService,
-            final NamedXContentRegistry xContentRegistry, final Environment environment, final NodeEnvironment nodeEnvironment,
-            final NamedWriteableRegistry namedWriteableRegistry, final IndexNameExpressionResolver indexNameExpressionResolver,
-            final Supplier<RepositoriesService> repositoriesServiceSupplier, final TelemetryProvider telemetryProvider,
-            final AllocationService allocationService, final IndicesService indicesService) {
+    public Collection<?> createComponents(PluginServices services) {
         final Collection<Object> components = new ArrayList<>();
         service = new FessAnalysisService();
         components.add(service);

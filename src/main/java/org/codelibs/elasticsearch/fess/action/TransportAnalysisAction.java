@@ -20,6 +20,7 @@ import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.HandledTransportAction;
 import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.common.util.concurrent.EsExecutors;
 import org.elasticsearch.plugins.PluginsService;
 import org.elasticsearch.tasks.Task;
 import org.elasticsearch.transport.TransportService;
@@ -29,7 +30,7 @@ public class TransportAnalysisAction extends HandledTransportAction<AnalysisRequ
     @Inject
     public TransportAnalysisAction(final TransportService transportService, final ActionFilters actionFilters,
             final PluginsService pluginsService, final FessAnalysisService fessAnalysisService) {
-        super(AnalysisAction.NAME, transportService, actionFilters, AnalysisRequest::new);
+        super(AnalysisAction.NAME, transportService, actionFilters, AnalysisRequest::new, EsExecutors.DIRECT_EXECUTOR_SERVICE);
         fessAnalysisService.setPluginsService(pluginsService);
     }
 
